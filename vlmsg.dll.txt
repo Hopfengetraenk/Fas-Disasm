@@ -1,0 +1,3 @@
+If you work with fsl files...
+Copy vlmsg.dll from your Autocad Dir here!
+(There is no need to do this you work with fas files only.)

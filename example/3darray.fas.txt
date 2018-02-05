@@ -1,0 +1,1153 @@
+00000 14    1 1 1 0       defun main  with 1 vars, Arg_min: 1, Arg_max: 1, do_cleanup: 0   0(defun main 
+00005 32    0             push  00                                                         1
+00007 33    122           push 00000290                                                    2
+00012 2A                  (Insert 0 at beginning of 290                                    1
+00013 39    1             push ListObject with 1 elements                                  1
+00016 5B   "PRINC"        load Commands                                                    2
+00024 55   "  3DREIHE geladen."  String [lnode]                                                   3
+00047 56   "vl-ACAD-defun"  load Commands                                                    4
+00063 5B   "C:3DARRAY" "R-ARRAY" "P-ARRAY" "3DAERR" "MODER" "MODES" "AI_ACADAPP" "STRCAT"  load Commands                                                    12
+00128 55   "\n Support-Verzeichnis überprüfen." "Kann Datei AI_UTILS.LSP nicht finden." "Kann Datei AI_UTILS.LSP nicht finden" "3DREIHE"  String [lnode]                                                   16
+00252 5B   "EQ" "LOAD"    load Commands                                                    18
+00262 55   "ai_utils" "failed"  String [lnode]                                                   20
+00283 5B   "NOT" "FINDFILE"  load Commands                                                    22
+00298 55   "ai_utils.lsp"  String [lnode]                                                   23
+00315 5B   "LISTP" "AI_DCL" "AI_ABORT"  load Commands                                                    26
+00339 1                   Push nil                                                         27
+00340 1                   Push nil                                                         28
+00341 43    0 1B          mov 27 Stackelements to VarPos 0 at this stream                  1
+00346 A                   pop dummy (decrease stack)
+                                     0FasStringtables 0
+00347 33    88B           push 00002187                                                    1
+00352 33    9D1           push 00002513                                                    2
+00357 2A                  (Insert 2187 at beginning of 2513                                1
+00358 33    392           push 00000914                                                    2
+00363 33    88B           push 00002187                                                    3
+00368 2A                  (Insert 914 at beginning of 2187                                 2
+00369 33    199           push 00000409                                                    3
+00374 33    392           push 00000914                                                    4
+00379 2A                  (Insert 409 at beginning of 914                                  3
+00380 33    135           push 00000309                                                    4
+00385 33    199           push 00000409                                                    5
+00390 2A                  (Insert 309 at beginning of 409                                  4
+00391 33    E9            push 00000233                                                    5
+00396 33    135           push 00000309                                                    6
+00401 2A                  (Insert 233 at beginning of 309                                  5
+00402 32    79            push  121                                                        6
+00404 33    E9            push 00000233                                                    7
+00409 2A                  (Insert 121 at beginning of 233                                  6
+00410 32    19            push  25                                                         7
+00412 32    43            push  67                                                         8
+00414 2A                  (Insert 25 at beginning of 67                                    7
+00415 32    0             push  00                                                         8
+00417 32    79            push  121                                                        9
+00419 2A                  (Insert 0 at beginning of 121                                    8
+00420 39    8             push ListObject with 8 elements                                  1
+00423 5B   "T" "EQ"       load Commands                                                    3
+00430 55   "Rechteckige"  String [lnode]                                                   4
+00446 5B   "XX"           load Commands                                                    5
+00451 55   "\nAnordnungstyp eingeben [Rechteckig/Polar] <R>:" "Rechteckige Polare Kreisförmige"  String [lnode]                                                   7
+00536 5B   "AI_SSGET" "SSGET" "GRAPHSCR"  load Commands                                                    10
+00562 55   "_GROUP"       String [lnode]                                                   11
+00573 5B   "AI_UNDO_ON"   load Commands                                                    12
+00586 55   "CMDECHO"      String [lnode]                                                   13
+00598 55   "cmdecho"      String [lnode]                                                   14
+00610 55   "blipmode"     String [lnode]                                                   15
+00623 55   "highlight"    String [lnode]                                                   16
+00637 55   "orthomode"    String [lnode]                                                   17
+00651 55   "ucsfollow"    String [lnode]                                                   18
+00665 55   "gridmode"     String [lnode]                                                   19
+00678 39    6             push ListObject with 6 elements                                  14
+00681 5B   "3DAERR"       load Commands                                                    15
+00690 55   "\n *** Unzulässiger Befehl im Papierbereich ***\n" "tilemode" "cvport"  String [lnode]                                                   18
+00760 5B   "OLDERR"       load Commands                                                    19
+00769 5B   "SS"           load Commands                                                    20
+00774 5B   "XX"           load Commands                                                    21
+00779 5B   "UNDO_SETTING"  load Commands                                                    22
+00794 39    4             push ListObject with 4 elements                                  19
+00797 55   "1" "_R" "SEQEND" "ATTRIB" "VERTEX"  String [lnode]                                                   24
+00831 5B   "NTH" "ED" "ENTGET" "E" "SS2" "SSADD" "1+"  load Commands                                                    31
+00862 55   "0,0,0" "_.COPY"  String [lnode]                                                   33
+00880 5B   "NOT" "EN" "ENTNEXT" "EL" "ENTLAST"  load Commands                                                    38
+00908 55   "BLIPMODE"     String [lnode]                                                   39
+00921 5B   "Z"            load Commands                                                    40
+00925 55   "\nEbenenabstand eingeben (...): "  String [lnode]                                                   41
+00961 5B   "X"            load Commands                                                    42
+00965 55   "\nSpaltenabstand eingeben (|||): "  String [lnode]                                                   43
+01002 5B   "Y" "GETDIST"  load Commands                                                    45
+01014 55   "\nZeilenabstand eingeben (---): "  String [lnode]                                                   46
+01050 5B   "FLAG"         load Commands                                                    47
+01057 55   "HIGHLIGHT" "ORTHOMODE" " Objekten übersteigen, die durch die Umgebungsvariable MaxArray festgelegt sind.\n" " Objekte erzeugen, also die erlaubte Anzahl von "  String [lnode]                                                   51
+01215 5B   "-"            load Commands                                                    52
+01219 55   "\nDies würde "  String [lnode]                                                   53
+01236 5B   "<" "*" "NE" "SSLENGTH" "ATOI" "MAXLIMIT" "GETENV"  load Commands                                                    60
+01275 55   "MaxArray" "\nAnordnung mit einem Element, nichts zu verarbeiten.\nBitte versuchen Sie es erneut" "\nEbenenanzahl eingeben (...) <1>: " "\nSpaltenanzahl eingeben (|||) <1>: " "\nZeilenanzahl eingeben (---) <1>: "  String [lnode]                                                   65
+01481 5B   "NL" "NC" "NR"  load Commands                                                    68
+01492 5B   "NR"           load Commands                                                    69
+01497 5B   "NC"           load Commands                                                    70
+01502 5B   "NL"           load Commands                                                    71
+01507 5B   "FLAG"         load Commands                                                    72
+01514 5B   "X"            load Commands                                                    73
+01518 5B   "Y"            load Commands                                                    74
+01522 5B   "Z"            load Commands                                                    75
+01526 5B   "C"            load Commands                                                    76
+01530 5B   "EL"           load Commands                                                    77
+01535 5B   "EN"           load Commands                                                    78
+01540 5B   "SS2"          load Commands                                                    79
+01546 5B   "E"            load Commands                                                    80
+01550 39    C             push ListObject with 12 elements                                 69
+01553 55   "_p" "_P" ""   String [lnode]                                                   72
+01566 5B   "SS"           load Commands                                                    73
+01571 55   "_.ARRAY" "_ZAXIS" "_.UCS" "GRIDMODE" "UCSFOLLOW" "\nBitte versuchen Sie es erneut: " "\nUngültiger Punkt: Zweiter Punkt darf nicht mit Mittelpunkt übereinstimmen."  String [lnode]                                                   80
+01730 5B   "EQUAL" "RA"   load Commands                                                    82
+01741 55   "\nZweiten Punkt auf Drehachse angeben: "  String [lnode]                                                   83
+01784 5B   "C" "TRANS" "CEN" "GETPOINT"  load Commands                                                    87
+01807 55   "\nMittelpunkt der Anordnung angeben: " "_N" "_Y" "Ja"  String [lnode]                                                   91
+01860 5B   "NULL" "YN" "GETKWORD"  load Commands                                                    94
+01879 55   "\nAngeordnete Objekte drehen? [Ja/Nein] <J>: " "Ja Nein"  String [lnode]                                                   96
+01937 5B   "AF" "GETREAL"  load Commands                                                    98
+01950 55   "\nAuszufüllenden Winkel angeben (+=ccw, -=cw) <360>: "  String [lnode]                                                   99
+02007 5B   "PROMPT"       load Commands                                                    100
+02016 55   "\nElementanzahl muß höher sein als 1"  String [lnode]                                                   101
+02056 5B   "=" "GETINT"   load Commands                                                    103
+02067 55   "\nAnzahl der Elemente in der Anordnung angeben: "  String [lnode]                                                   104
+02119 5B   "INITGET" "+" "<=" "N"  load Commands                                                    108
+02136 56   "_al-bind-alist"  load Commands                                                    109
+02153 5B   "N"            load Commands                                                    110
+02157 5B   "AF"           load Commands                                                    111
+02162 5B   "YN"           load Commands                                                    112
+02167 5B   "CEN"          load Commands                                                    113
+02173 5B   "C"            load Commands                                                    114
+02177 5B   "RA"           load Commands                                                    115
+02182 39    6             push ListObject with 6 elements                                  110
+02185 5B   "OLDERR" "AI_UNDO_OFF"  load Commands                                                    112
+02206 55   "_E"           String [lnode]                                                   113
+02213 56   "ads-cmd"      load Commands                                                    114
+02223 55   "_.UNDO" "\nFehler: "  String [lnode]                                                   116
+02245 5B   "/="           load Commands                                                    117
+02250 55   "Funktion abgebrochen"  String [lnode]                                                   118
+02275 5B   "ST" "SETVAR" "CADAR" "CAAR" "CDR" "APPEND" "LIST" "GETVAR" "CAR" "LENGTH" "MLST" "A" "EXIT" "ALERT" "STRCAT"  load Commands                                                    133
+02357 55   "  \n" " \n\n  " " Anwendungsfehler: "  String [lnode]                                                   136
+02393 5B   "PRINC" "*ERROR*" "OLD_ERROR" "S" "MSG" "APP"  load Commands                                                    142
+02429 5C    0             Push FuncArg[0]                                                  143
+02432 32    19            push  25                                                         144
+02434 5B   "*ERROR*"      load Commands                                                    145
+02444 3A                  defFuncName *ERROR*, StartOffset 25 Modul FuncArg[0]
+           143
+02445 5C    0             Push FuncArg[0]                                                  144
+02448 43    0 8F          mov 143 Stackelements to VarPos 0 at FuncStream                  1
+02453 A                   pop dummy (decrease stack)
+                                     0FasStringtables 1
+02454 5C    0             Push FuncArg[0]                                                  1
+02457 33    88B           push 00002187                                                    2
+02462 5B   "C:3DARRAY"    load Commands                                                    3
+02474 3A                  defFuncName C:3DARRAY, StartOffset 2187 Modul FuncArg[0]
+       1
+02475 5C    0             Push FuncArg[0]                                                  2
+02478 33    392           push 00000914                                                    3
+02483 5B   "R-ARRAY"      load Commands                                                    4
+02493 3A                  defFuncName R-ARRAY, StartOffset 914 Modul FuncArg[0]
+          2
+02494 5C    0             Push FuncArg[0]                                                  3
+02497 33    199           push 00000409                                                    4
+02502 5B   "P-ARRAY"      load Commands                                                    5
+02512 3A                  defFuncName P-ARRAY, StartOffset 409 Modul FuncArg[0]
+          3
+02513 5C    0             Push FuncArg[0]                                                  4
+02516 33    135           push 00000309                                                    5
+02521 5B   "3DAERR"       load Commands                                                    6
+02530 3A                  defFuncName 3DAERR, StartOffset 309 Modul FuncArg[0]
+           4
+02531 5C    0             Push FuncArg[0]                                                  5
+02534 33    E9            push 00000233                                                    6
+02539 5B   "MODER"        load Commands                                                    7
+02547 3A                  defFuncName MODER, StartOffset 233 Modul FuncArg[0]
+            5
+02548 5C    0             Push FuncArg[0]                                                  6
+02551 32    79            push  121                                                        7
+02553 5B   "MODES"        load Commands                                                    8
+02561 3A                  defFuncName MODES, StartOffset 121 Modul FuncArg[0]
+            6
+02562 5C    0             Push FuncArg[0]                                                  7
+02565 32    0             push  00                                                         8
+02567 5B   "AI_ABORT"     load Commands                                                    9
+02578 3A                  defFuncName AI_ABORT, StartOffset 0 Modul FuncArg[0]
+           7
+02579 1                   Push nil                                                         8
+02580 43    1B 7          mov 7 Stackelements to VarPos 27 at this stream                  1
+02585 1C                  init done FasStringtables 0                                      0
+02586 14    1 0 0 0       defun main  with 1 vars, Arg_min: 0, Arg_max: 0, do_cleanup: 0   0(defun main 
+02591 9     1A            push nil                                                         1
+02594 A                   pop dummy (decrease stack)
+                                     0nil
+02595 57    0             goto 2600                                                        0
+02600 9     21            push <Func> AI_ABORT                                             1
+02603 6     19            setq AI_ABORT <Func> AI_ABORT                                    0(setq AI_ABORT <Func> AI_ABORT)
+02606 9     19            push AI_ABORT                                                    1
+02609 A                   pop dummy (decrease stack)
+                                     0AI_ABORT
+									 
+--------------------------------									 
+02610 3     18            Push value of [AI_DCL]                                           1
+02613 6A    E             and_If (AI_DCL) .pop Else goto 2632                              1
+
+02618 3     18               Push value of [AI_DCL]                                        1
+02621 35    1 17 3           LISTP 1 Params are above...                                   1
+02626 6A    1                and_If ((LISTP AI_DCL)) .pop Else goto 2632                   1
+
+02631 2                         Push T                                                     1
+02632 68    5C            Cond If (T) Goto 2729 Else .pop                                  1(cond T (
+
+
+
+2222222222222222222222222222222
+02637 9     16               push "ai_utils.lsp"                                           1
+02640 35    1 15 3           FINDFILE 1 Params are above...                                1
+02645 35    1 14 3           NOT 1 Params are above...                                     1
+
+02650 68    30               Cond If (
+(NOT (FINDFILE "ai_utils.lsp"))
+										) Goto 2703 Else .pop 							   1 (cond (NOT (FINDFILE "ai_utils.lsp")) (
+
+
+3333333333333333333333333333333										
+02655 9     13                  push "failed"                                              1
+02658 9     12                  push "ai_utils"                                            2
+02661 9     13                  push "failed"                                              3
+02664 35    2 11 3              LOAD 2 Params are above...                                 2
+02669 35    2 10 3              EQ 2 Params are above...                                   1
+
+02674 68    6                   Cond If (
+(EQ "failed" (LOAD "ai_utils" "failed"))
+										) Goto 2681
+
+44444444444444444444444444444444444										
+02679 1                            Push nil                                                1
+02680 57    D                      goto 2698                                               1
+02680 57    D                   Cond If ((EQ "failed" (LOAD "ai_utils" "failed"))) Goto 2681normal cond
+02685 A                         pop dummy (decrease stack)
+                               0nil
+02686 9     F                   push "3DREIHE"                                             1
+02689 9     E                   push "Kann Datei AI_UTILS.LSP nicht finden"                2
+02692 35    2 19 3              AI_ABORT 2 Params are above...                             1
+02697 20                        nop                                                        1
+02698 57    15                  goto 2724                                                  1
+02698 57    15               Cond If ((NOT (FINDFILE "ai_utils.lsp"))) Goto 2703 Else .pop 1normal cond
+02703 A                      pop dummy (decrease stack)
+                                  0(AI_ABORT "3DREIHE" "Kann Datei AI_UTILS.LSP nicht finden")
+02704 9     F                push "3DREIHE"                                                1
+02707 9     D                push "Kann Datei AI_UTILS.LSP nicht finden."                  2
+02710 9     C                push "\n Support-Verzeichnis überprüfen."                     3
+02713 35    2 B 3            STRCAT 2 Params are above...                                  2
+02718 35    2 19 3           AI_ABORT 2 Params are above...                                1
+02723 20                     nop                                                           1
+02724 57    0                goto 2729                                                     1
+02724 57    0             Cond If (T) Goto 2729 Else .pop                                  1normal cond
+02729 A                   pop dummy (decrease stack)
+                                     0(AI_ABORT "3DREIHE" (STRCAT "Kann Datei AI_UTILS.LSP nicht finden." "\n Support-Verzeichnis überprüfen."))
+02730 35    0 A 3         AI_ACADAPP 0 Params are above...                                 1
+02735 35    1 14 3        NOT 1 Params are above...                                        1
+02740 67    F             If ((NOT (AI_ACADAPP )))... else goto 2760                       0
+02745 9     F                push "3DREIHE"                                                1
+02748 1                      Push nil                                                      2
+02749 35    2 19 3           AI_ABORT 2 Params are above...                                1
+02754 20                     nop                                                           1
+02755 57    1                goto 2761                                                     1
+02760 1                      Push nil                                                      1
+02761 A                   pop dummy (decrease stack)
+                                     0Then OR Else
+02762 57    0             goto 2767                                                        0
+02767 9     20            push <Func> MODES                                                1
+02770 6     9             setq MODES <Func> MODES                                          0(setq MODES <Func> MODES)
+02773 9     9             push MODES                                                       1
+02776 A                   pop dummy (decrease stack)
+                                     0MODES
+02777 57    0             goto 2782                                                        0
+02782 9     1F            push <Func> MODER                                                1
+02785 6     8             setq MODER <Func> MODER                                          0(setq MODER <Func> MODER)
+02788 9     8             push MODER                                                       1
+02791 A                   pop dummy (decrease stack)
+                                     0MODER
+02792 57    0             goto 2797                                                        0
+02797 9     1E            push <Func> 3DAERR                                               1
+02800 6     7             setq 3DAERR <Func> 3DAERR                                        0(setq 3DAERR <Func> 3DAERR)
+02803 9     7             push 3DAERR                                                      1
+02806 A                   pop dummy (decrease stack)
+                                     03DAERR
+02807 57    0             goto 2812                                                        0
+02812 9     1D            push <Func> P-ARRAY                                              1
+02815 6     6             setq P-ARRAY <Func> P-ARRAY                                      0(setq P-ARRAY <Func> P-ARRAY)
+02818 9     6             push P-ARRAY                                                     1
+02821 A                   pop dummy (decrease stack)
+                                     0P-ARRAY
+02822 57    0             goto 2827                                                        0
+02827 9     1C            push <Func> R-ARRAY                                              1
+02830 6     5             setq R-ARRAY <Func> R-ARRAY                                      0(setq R-ARRAY <Func> R-ARRAY)
+02833 9     5             push R-ARRAY                                                     1
+02836 A                   pop dummy (decrease stack)
+                                     0R-ARRAY
+02837 57    0             goto 2842                                                        0
+02842 9     1B            push <Func> C:3DARRAY                                            1
+02845 6     4             setq C:3DARRAY <Func> C:3DARRAY                                  0(setq C:3DARRAY <Func> C:3DARRAY)
+02848 9     4             push C:3DARRAY                                                   1
+02851 35    1 3 1         Internal ACAD Command vl-ACAD-defun 1 Params are above...        1
+02856 A                   pop dummy (decrease stack)
+                                     0(vl-ACAD-defun C:3DARRAY)
+02857 9     4             push C:3DARRAY                                                   1
+02860 A                   pop dummy (decrease stack)
+                                     0C:3DARRAY
+02861 9     2             push "  3DREIHE geladen."                                        1
+02864 35    1 1 3         PRINC 1 Params are above...                                      1
+02869 A                   pop dummy (decrease stack)
+                                     0(PRINC "  3DREIHE geladen.")
+02870 35    0 1 3         PRINC 0 Params are above...                                      1
+02875 16                  end Defun
+                                                      0
+00000 14    2 2 2 0       defun AI_ABORT with 2 vars, Arg_min: 2, Arg_max: 2, do_cleanup: 00(defun AI_ABORT
+00005 9     8D            push APP                                                         1
+00008 5C    0             Push FuncArg[0]                                                  2
+00011 9     8C            push MSG                                                         3
+00014 5C    1             Push FuncArg[1]                                                  4
+00017 18    5             Init (APP=FuncArg[0]  MSG=FuncArg[1]  ) 1                        0(APP  MSG)
+00020 57    2A            goto 67                                                          0
+00025 14    1 1 1 0       defun *ERROR* with 1 vars, Arg_min: 1, Arg_max: 1, do_cleanup: 0 0(defun *ERROR*
+00030 9     8B            push S                                                           1
+00033 5C    0             Push FuncArg[0]                                                  2
+00036 18    3             Init (S=FuncArg[0]  ) 1                                          0(S)
+00039 3     8A            Push value of [OLD_ERROR]                                        1
+00042 67    B             If (OLD_ERROR)... else goto 58                                   0
+00047 3     8A               Push value of [OLD_ERROR]                                     1
+00050 6     89               setq *ERROR* OLD_ERROR                                        0(setq *ERROR* OLD_ERROR)
+00053 57    0                goto 58                                                       0
+00058 35    0 88 3           PRINC 0 Params are above...                                   1
+00063 19    1             clear 1 args+vars                                                1
+00066 16                  end Defun
+                                                      0
+00067 9     8E            push <Func> *ERROR*                                              1
+00070 6     89            setq *ERROR* <Func> *ERROR*                                      0(setq *ERROR* <Func> *ERROR*)
+00073 3     8C            Push value of [MSG]                                              1
+00076 67    1F            If (MSG)... else goto 112                                        0
+00081 9     87               push " Anwendungsfehler: "                                    1
+00084 3     8D               Push value of [APP]                                           2
+00087 9     86               push " \n\n  "                                                3
+00090 3     8C               Push value of [MSG]                                           4
+00093 9     85               push "  \n"                                                   5
+00096 35    5 84 3           STRCAT 5 Params are above...                                  1
+00101 35    1 83 3           ALERT 1 Params are above...                                   1
+00106 A                      pop dummy (decrease stack)
+                                  0(ALERT (STRCAT " Anwendungsfehler: " APP " \n\n  " MSG "  \n"))
+00107 57    0                goto 112                                                      0
+00112 35    0 82 3           EXIT 0 Params are above...                                    1
+00117 19    2             clear 2 args+vars                                                1
+00120 16                  end Defun
+                                                      0
+00121 14    2 1 1 0       defun MODES with 2 vars, Arg_min: 1, Arg_max: 1, do_cleanup: 0   0(defun MODES
+00126 9     81            push A                                                           1
+00129 5C    0             Push FuncArg[0]                                                  2
+00132 18    3             Init (A=FuncArg[0]  ) 1                                          0(A)
+00135 1                   Push nil                                                         1
+00136 6     80            setq MLST nil                                                    0(setq MLST nil)
+00139 3     81            Push value of [A]                                                1
+00142 35    1 7F 3        LENGTH 1 Params are above...                                     1
+00147 5D    1             FuncArg[1] = (LENGTH A)                                          0
+00150 1                   Push nil                                                         1
+00151 5C    1             Push FuncArg[1]                                                  2
+00154 32    0             push  00                                                         3
+00156 4B                  <= FuncArg[1] 0                                                  2
+00157 67    43            (Repeat (<= FuncArg[1] 0) ... else goto 229                      1
+00162 A                      pop dummy (decrease stack)
+                                  0nil
+00163 5C    1                Push FuncArg[1]                                               1
+00166 50                     dec FuncArg[1]                                                1
+00167 5D    1                FuncArg[1] = (1- FuncArg[1])                                  0
+00170 3     80               Push value of [MLST]                                          1
+00173 3     81               Push value of [A]                                             2
+00176 35    1 7E 3           CAR 1 Params are above...                                     2
+00181 3     81               Push value of [A]                                             3
+00184 35    1 7E 3           CAR 1 Params are above...                                     3
+00189 35    1 7D 3           GETVAR 1 Params are above...                                  3
+00194 35    2 7C 3           LIST 2 Params are above...                                    2
+00199 35    1 7C 3           LIST 1 Params are above...                                    2
+00204 35    2 7B 3           APPEND 2 Params are above...                                  1
+00209 6     80               setq MLST (APPEND MLST (LIST (LIST (CAR A) (GETVAR (CAR A)))))0(setq MLST (APPEND MLST (LIST (LIST (CAR A) (GETVAR (CAR A))))))
+00212 3     81               Push value of [A]                                             1
+00215 35    1 7A 3           CDR 1 Params are above...                                     1
+00220 B                      Push (CDR A)[Last element again]                              2
+00221 6     81               setq A (CDR A)                                                1(setq A (CDR A))
+00224 57    FFFFFFB2         goto 151                                                      1
+00229 19    1             clear 1 args+vars                                                1
+00232 16                  end Defun
+                                                      0
+00233 14    1 0 0 0       defun MODER with 1 vars, Arg_min: 0, Arg_max: 0, do_cleanup: 0   0(defun MODER
+00238 3     80            Push value of [MLST]                                             1
+00241 35    1 7F 3        LENGTH 1 Params are above...                                     1
+00246 5D    0             FuncArg[0] = (LENGTH MLST)                                       0
+00249 1                   Push nil                                                         1
+00250 5C    0             Push FuncArg[0]                                                  2
+00253 32    0             push  00                                                         3
+00255 4B                  <= FuncArg[0] 0                                                  2
+00256 67    2F            (Repeat (<= FuncArg[0] 0) ... else goto 308                      1
+00261 A                      pop dummy (decrease stack)
+                                  0nil
+00262 5C    0                Push FuncArg[0]                                               1
+00265 50                     dec FuncArg[0]                                                1
+00266 5D    0                FuncArg[0] = (1- FuncArg[0])                                  0
+00269 3     80               Push value of [MLST]                                          1
+00272 35    1 79 3           CAAR 1 Params are above...                                    1
+00277 3     80               Push value of [MLST]                                          2
+00280 35    1 78 3           CADAR 1 Params are above...                                   2
+00285 35    2 77 3           SETVAR 2 Params are above...                                  1
+00290 A                      pop dummy (decrease stack)
+                                  0(SETVAR (CAAR MLST) (CADAR MLST))
+00291 3     80               Push value of [MLST]                                          1
+00294 35    1 7A 3           CDR 1 Params are above...                                     1
+00299 B                      Push (CDR MLST)[Last element again]                           2
+00300 6     80               setq MLST (CDR MLST)                                          1(setq MLST (CDR MLST))
+00303 57    FFFFFFC6         goto 250                                                      1
+00308 16                  end Defun
+                                                      0
+00309 14    1 1 1 0       defun 3DAERR with 1 vars, Arg_min: 1, Arg_max: 1, do_cleanup: 0  0(defun 3DAERR
+00314 9     76            push ST                                                          1
+00317 5C    0             Push FuncArg[0]                                                  2
+00320 18    3             Init (ST=FuncArg[0]  ) 1                                         0(ST)
+00323 3     76            Push value of [ST]                                               1
+00326 9     75            push "Funktion abgebrochen"                                      2
+00329 35    2 74 3        /= 2 Params are above...                                         1
+00334 67    16            If ((/= ST "Funktion abgebrochen"))... else goto 361             0
+00339 9     73               push "\nFehler: "                                             1
+00342 3     8B               Push value of [S]                                             2
+00345 35    2 84 3           STRCAT 2 Params are above...                                  1
+00350 35    1 88 3           PRINC 1 Params are above...                                   1
+00355 A                      pop dummy (decrease stack)
+                                  0(PRINC (STRCAT "\nFehler: " S))
+00356 57    0                goto 361                                                      0
+00361 9     72               push "_.UNDO"                                                 1
+00364 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 1
+00370 A                   pop dummy (decrease stack)
+                                     0(ads-cmd Then OR Else)
+00371 9     70            push "_E"                                                        1
+00374 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 1
+00380 A                   pop dummy (decrease stack)
+                                     0(ads-cmd "_E")
+00381 35    0 6F 3        AI_UNDO_OFF 0 Params are above...                                1
+00386 A                   pop dummy (decrease stack)
+                                     0(AI_UNDO_OFF )
+00387 5F    0 E9          jmp1 MODER at 233()                                              1
+00393 A                   pop dummy (decrease stack)
+                                     0Retval of jmp1 MODER at 233()
+00394 3     6E            Push value of [OLDERR]                                           1
+00397 6     89            setq *ERROR* OLDERR                                              0(setq *ERROR* OLDERR)
+00400 35    0 88 3        PRINC 0 Params are above...                                      1
+00405 19    1             clear 1 args+vars                                                1
+00408 16                  end Defun
+                                                      0
+00409 14    0 0 0 0       defun P-ARRAY with 0 vars, Arg_min: 0, Arg_max: 0, do_cleanup: 0 0(defun P-ARRAY
+00414 9     6D            push '(N AF YN CEN C RA)                                         1
+00417 51    1 6C 1        _al-bind-alist 1 Params are above <- Convert to funcptr          1
+00423 A                   pop dummy (decrease stack)
+                                     0(_al-bind-alist '(N AF YN CEN C RA))
+00424 32    0             push  00                                                         1
+00426 6     6B            setq N 0                                                         0(setq N 0)
+00429 3     6B            Push value of [N]                                                1
+00432 32    1             push  01                                                         2
+00434 35    2 6A 3        <= 2 Params are above...                                         1
+00439 67    3E            If ((<= N 1))... else goto 506                                   0
+00444 32    1                push  01                                                      1
+00446 32    2                push  02                                                      2
+00448 32    4                push  04                                                      3
+00450 35    3 69 3           + 3 Params are above...                                       1
+00455 35    1 68 3           INITGET 1 Params are above...                                 1
+00460 A                      pop dummy (decrease stack)
+                                  0(INITGET (+ 1 2 4))
+00461 9     67               push "\nAnzahl der Elemente in der Anordnung angeben: "       1
+00464 35    1 66 3           GETINT 1 Params are above...                                  1
+00469 6     6B               setq N (GETINT "\nAnzahl der Elemente in der Anordnung angeben0(setq N (GETINT "\nAnzahl der Elemente in der Anordnung angeben: "))
+00472 3     6B               Push value of [N]                                             1
+00475 32    1                push  01                                                      2
+00477 35    2 65 3           = 2 Params are above...                                       1
+00482 67    E                If ((= N 1))... else goto 501                                 0
+00487 9     64                  push "\nElementanzahl muß höher sein als 1"                1
+00490 35    1 63 3              PROMPT 1 Params are above...                               1
+00495 A                         pop dummy (decrease stack)
+                               0(PROMPT "\nElementanzahl muß höher sein als 1")
+00496 57    0                   goto 501                                                   0
+00501 57    FFFFFFB3            goto 429                                                   0
+00506 32    2             push  02                                                         2
+00508 35    1 68 3        INITGET 1 Params are above...                                    2
+00513 A                   pop dummy (decrease stack)
+                                     1(INITGET 2)
+00514 9     62            push "\nAuszufüllenden Winkel angeben (+=ccw, -=cw) <360>: "     2
+00517 35    1 61 3        GETREAL 1 Params are above...                                    2
+00522 6     60            setq AF (GETREAL "\nAuszufüllenden Winkel angeben (+=ccw, -=cw) <1(setq AF (GETREAL "\nAuszufüllenden Winkel angeben (+=ccw, -=cw) <360>: "))
+00525 3     60            Push value of [AF]                                               2
+00528 1                   Push nil                                                         3
+00529 35    2 65 3        = 2 Params are above...                                          2
+00534 67    D             If ((= AF nil))... else goto 552                                 1
+00539 33    168              push 00000360                                                 2
+00544 6     60               setq AF 360                                                   1(setq AF 360)
+00547 57    0                goto 552                                                      1
+00552 9     5F               push "Ja Nein"                                                2
+00555 35    1 68 3        INITGET 1 Params are above...                                    1
+00560 A                   pop dummy (decrease stack)
+                                     0(INITGET Then OR Else)
+00561 9     5E            push "\nAngeordnete Objekte drehen? [Ja/Nein] <J>: "             1
+00564 35    1 5D 3        GETKWORD 1 Params are above...                                   1
+00569 6     5C            setq YN (GETKWORD "\nAngeordnete Objekte drehen? [Ja/Nein] <J>: "0(setq YN (GETKWORD "\nAngeordnete Objekte drehen? [Ja/Nein] <J>: "))
+00572 3     5C            Push value of [YN]                                               1
+00575 35    1 5B 3        NULL 1 Params are above...                                       1
+00580 67    B             If ((NULL YN))... else goto 596                                  0
+00585 9     5A               push "Ja"                                                     1
+00588 6     5C               setq YN "Ja"                                                  0(setq YN "Ja")
+00591 57    0                goto 596                                                      0
+00596 3     5C               Push value of [YN]                                            1
+00599 9     5A            push "Ja"                                                        2
+00602 35    2 65 3        = 2 Params are above...                                          1
+00607 67    8             If ((= Then OR Else "Ja"))... else goto 620                      0
+00612 9     59               push "_Y"                                                     1
+00615 57    3                goto 623                                                      1
+00620 9     58               push "_N"                                                     1
+00623 6     5C            setq YN Then OR Else                                             0(setq YN Then OR Else)
+00626 32    11            push  17                                                         1
+00628 35    1 68 3        INITGET 1 Params are above...                                    1
+00633 A                   pop dummy (decrease stack)
+                                     0(INITGET 17)
+00634 9     57            push "\nMittelpunkt der Anordnung angeben: "                     1
+00637 35    1 56 3        GETPOINT 1 Params are above...                                   1
+00642 6     55            setq CEN (GETPOINT "\nMittelpunkt der Anordnung angeben: ")      0(setq CEN (GETPOINT "\nMittelpunkt der Anordnung angeben: "))
+00645 3     55            Push value of [CEN]                                              1
+00648 32    1             push  01                                                         2
+00650 32    0             push  00                                                         3
+00652 35    3 54 3        TRANS 3 Params are above...                                      1
+00657 6     53            setq C (TRANS CEN 1 0)                                           0(setq C (TRANS CEN 1 0))
+00660 32    11            push  17                                                         1
+00662 35    1 68 3        INITGET 1 Params are above...                                    1
+00667 A                   pop dummy (decrease stack)
+                                     0(INITGET 17)
+00668 3     55            Push value of [CEN]                                              1
+00671 9     52            push "\nZweiten Punkt auf Drehachse angeben: "                   2
+00674 35    2 56 3        GETPOINT 2 Params are above...                                   1
+00679 6     51            setq RA (GETPOINT CEN "\nZweiten Punkt auf Drehachse angeben: ") 0(setq RA (GETPOINT CEN "\nZweiten Punkt auf Drehachse angeben: "))
+00682 3     51            Push value of [RA]                                               1
+00685 3     55            Push value of [CEN]                                              2
+00688 35    2 50 3        EQUAL 2 Params are above...                                      1
+00693 67    24            If ((EQUAL RA CEN))... else goto 734                             0
+00698 9     4F               push "\nUngültiger Punkt: Zweiter Punkt darf nicht mit Mittelp1
+00701 35    1 88 3           PRINC 1 Params are above...                                   1
+00706 A                      pop dummy (decrease stack)
+                                  0(PRINC "\nUngültiger Punkt: Zweiter Punkt darf nicht mit Mittelpunkt übereinstimmen.")
+00707 32    11               push  17                                                      1
+00709 35    1 68 3           INITGET 1 Params are above...                                 1
+00714 A                      pop dummy (decrease stack)
+                                  0(INITGET 17)
+00715 3     55               Push value of [CEN]                                           1
+00718 9     4E               push "\nBitte versuchen Sie es erneut: "                      2
+00721 35    2 56 3           GETPOINT 2 Params are above...                                1
+00726 6     51               setq RA (GETPOINT CEN "\nBitte versuchen Sie es erneut: ")    0(setq RA (GETPOINT CEN "\nBitte versuchen Sie es erneut: "))
+00729 57    FFFFFFCC         goto 682                                                      0
+00734 9     4D            push "UCSFOLLOW"                                                 2
+00737 32    0             push  00                                                         3
+00739 35    2 77 3        SETVAR 2 Params are above...                                     2
+00744 A                   pop dummy (decrease stack)
+                                     1(SETVAR "UCSFOLLOW" 0)
+00745 9     4C            push "GRIDMODE"                                                  2
+00748 32    0             push  00                                                         3
+00750 35    2 77 3        SETVAR 2 Params are above...                                     2
+00755 A                   pop dummy (decrease stack)
+                                     1(SETVAR "GRIDMODE" 0)
+00756 9     4B            push "_.UCS"                                                     2
+00759 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00765 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "_.UCS")
+00766 9     4A            push "_ZAXIS"                                                    2
+00769 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00775 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "_ZAXIS")
+00776 3     55            Push value of [CEN]                                              2
+00779 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00785 A                   pop dummy (decrease stack)
+                                     1(ads-cmd CEN)
+00786 3     51            Push value of [RA]                                               2
+00789 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00795 A                   pop dummy (decrease stack)
+                                     1(ads-cmd RA)
+00796 3     53            Push value of [C]                                                2
+00799 32    0             push  00                                                         3
+00801 32    1             push  01                                                         4
+00803 35    3 54 3        TRANS 3 Params are above...                                      2
+00808 6     55            setq CEN (TRANS C 0 1)                                           1(setq CEN (TRANS C 0 1))
+00811 9     49            push "_.ARRAY"                                                   2
+00814 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00820 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "_.ARRAY")
+00821 3     48            Push value of [SS]                                               2
+00824 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00830 A                   pop dummy (decrease stack)
+                                     1(ads-cmd SS)
+00831 9     47            push ""                                                          2
+00834 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00840 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "")
+00841 9     46            push "_P"                                                        2
+00844 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00850 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "_P")
+00851 3     55            Push value of [CEN]                                              2
+00854 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00860 A                   pop dummy (decrease stack)
+                                     1(ads-cmd CEN)
+00861 3     6B            Push value of [N]                                                2
+00864 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00870 A                   pop dummy (decrease stack)
+                                     1(ads-cmd N)
+00871 3     60            Push value of [AF]                                               2
+00874 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00880 A                   pop dummy (decrease stack)
+                                     1(ads-cmd AF)
+00881 3     5C            Push value of [YN]                                               2
+00884 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00890 A                   pop dummy (decrease stack)
+                                     1(ads-cmd YN)
+00891 9     4B            push "_.UCS"                                                     2
+00894 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00900 A                   pop dummy (decrease stack)
+                                     1(ads-cmd "_.UCS")
+00901 9     45            push "_p"                                                        2
+00904 51    1 71 1        ads-cmd 1 Params are above <- Convert to funcptr                 2
+00910 19    6             clear 6 args+vars                                                2
+00913 16                  end Defun
+                                                      0
+00914 14    0 0 0 0       defun R-ARRAY with 0 vars, Arg_min: 0, Arg_max: 0, do_cleanup: 0 0(defun R-ARRAY
+00919 9     44            push '(NR NC NL FLAG X Y Z C EL EN SS2 E)                        1
+00922 51    1 6C 1        _al-bind-alist 1 Params are above <- Convert to funcptr          1
+00928 A                   pop dummy (decrease stack)
+                                     0(_al-bind-alist '(NR NC NL FLAG X Y Z C EL EN SS2 E))
+00929 3     43            Push value of [NR]                                               1
+00932 3     42            Push value of [NC]                                               2
+00935 3     41            Push value of [NL]                                               3
+00938 1                   Push nil                                                         4
+00939 35    4 65 3        = 4 Params are above...                                          1
+00944 68    16            Cond If ((= NR NC NL nil)) Goto 971 Else .pop                    1(cond (= NR NC NL nil) (
+00949 3     43               Push value of [NR]                                            1
+00952 3     42               Push value of [NC]                                            2
+00955 3     41               Push value of [NL]                                            3
+00958 32    1                push  01                                                      4
+00960 35    4 65 3           = 4 Params are above...                                       1
+00965 68    1                Cond If ((= NR NC NL 1)) Goto 971 Else .pop                   1(cond (= NR NC NL 1) (
+00970 1                         Push nil                                                   1
+00970 1                      Cond If ((= NR NC NL 1)) Goto 971 Else .pop                   1it's OR skip next 6 bytes -> 977
+00970 1                   Cond If ((= NR NC NL nil)) Goto 971 Else .pop                    1it's OR skip next 6 bytes -> 977
+00971 6A    1             and_If (nil) .pop Else goto 977                                  1
+00976 2                      Push T                                                        1
+00977 67    C0            If (T)... else goto 1174                                         0
+00982 32    1                push  01                                                      1
+00984 6     43               setq NR 1                                                     0(setq NR 1)
+00987 32    2                push  02                                                      1
+00989 32    4                push  04                                                      2
+00991 35    2 69 3           + 2 Params are above...                                       1
+00996 35    1 68 3           INITGET 1 Params are above...                                 1
+01001 A                      pop dummy (decrease stack)
+                                  0(INITGET (+ 2 4))
+01002 9     40               push "\nZeilenanzahl eingeben (---) <1>: "                    1
+01005 35    1 66 3           GETINT 1 Params are above...                                  1
+01010 6     43               setq NR (GETINT "\nZeilenanzahl eingeben (---) <1>: ")        0(setq NR (GETINT "\nZeilenanzahl eingeben (---) <1>: "))
+01013 3     43               Push value of [NR]                                            1
+01016 35    1 5B 3           NULL 1 Params are above...                                    1
+01021 67    A                If ((NULL NR))... else goto 1036                              0
+01026 32    1                   push  01                                                   1
+01028 6     43                  setq NR 1                                                  0(setq NR 1)
+01031 57    0                   goto 1036                                                  0
+01036 32    2                   push  02                                                   1
+01038 32    4                push  04                                                      2
+01040 35    2 69 3           + 2 Params are above...                                       1
+01045 35    1 68 3           INITGET 1 Params are above...                                 1
+01050 A                      pop dummy (decrease stack)
+                                  0(INITGET (+ Then OR Else 4))
+01051 9     3F               push "\nSpaltenanzahl eingeben (|||) <1>: "                   1
+01054 35    1 66 3           GETINT 1 Params are above...                                  1
+01059 6     42               setq NC (GETINT "\nSpaltenanzahl eingeben (|||) <1>: ")       0(setq NC (GETINT "\nSpaltenanzahl eingeben (|||) <1>: "))
+01062 3     42               Push value of [NC]                                            1
+01065 35    1 5B 3           NULL 1 Params are above...                                    1
+01070 67    A                If ((NULL NC))... else goto 1085                              0
+01075 32    1                   push  01                                                   1
+01077 6     42                  setq NC 1                                                  0(setq NC 1)
+01080 57    0                   goto 1085                                                  0
+01085 32    2                   push  02                                                   1
+01087 32    4                push  04                                                      2
+01089 35    2 69 3           + 2 Params are above...                                       1
+01094 35    1 68 3           INITGET 1 Params are above...                                 1
+01099 A                      pop dummy (decrease stack)
+                                  0(INITGET (+ Then OR Else 4))
+01100 9     3E               push "\nEbenenanzahl eingeben (...) <1>: "                    1
+01103 35    1 66 3           GETINT 1 Params are above...                                  1
+01108 6     41               setq NL (GETINT "\nEbenenanzahl eingeben (...) <1>: ")        0(setq NL (GETINT "\nEbenenanzahl eingeben (...) <1>: "))
+01111 3     41               Push value of [NL]                                            1
+01114 35    1 5B 3           NULL 1 Params are above...                                    1
+01119 67    A                If ((NULL NL))... else goto 1134                              0
+01124 32    1                   push  01                                                   1
+01126 6     41                  setq NL 1                                                  0(setq NL 1)
+01129 57    0                   goto 1134                                                  0
+01134 3     43                  Push value of [NR]                                         1
+01137 3     42               Push value of [NC]                                            2
+01140 3     41               Push value of [NL]                                            3
+01143 32    1                push  01                                                      4
+01145 35    4 65 3           = 4 Params are above...                                       1
+01150 67    E                If ((= Then OR Else NC NL 1))... else goto 1169               0
+01155 9     3D                  push "\nAnordnung mit einem Element, nichts zu verarbeiten.1
+01158 35    1 88 3              PRINC 1 Params are above...                                1
+01163 A                         pop dummy (decrease stack)
+                               0(PRINC "\nAnordnung mit einem Element, nichts zu verarbeiten.\nBitte versuchen Sie es erneut")
+01164 57    0                   goto 1169                                                  0
+01169 57    FFFFFF0B            goto 929                                                   0
+01174 9     3C            push "MaxArray"                                                  2
+01177 35    1 3B 3        GETENV 1 Params are above...                                     2
+01182 1                   Push nil                                                         3
+01183 35    2 65 3        = 2 Params are above...                                          2
+01188 67    D             If ((= (GETENV "MaxArray") nil))... else goto 1206               1
+01193 33    186A0            push 00100000                                                 2
+01198 6     3A               setq MAXLIMIT 100000                                          1(setq MAXLIMIT 100000)
+01201 57    10               goto 1222                                                     1
+01206 9     3C               push "MaxArray"                                               2
+01209 35    1 3B 3           GETENV 1 Params are above...                                  2
+01214 35    1 39 3           ATOI 1 Params are above...                                    2
+01219 6     3A            setq MAXLIMIT Then OR Else                                       0(setq MAXLIMIT Then OR Else)
+01222 3     48            Push value of [SS]                                               1
+01225 35    1 38 3        SSLENGTH 1 Params are above...                                   1
+01230 6     37            setq NE (SSLENGTH SS)                                            0(setq NE (SSLENGTH SS))
+01233 3     3A            Push value of [MAXLIMIT]                                         1
+01236 3     43            Push value of [NR]                                               2
+01239 3     42            Push value of [NC]                                               3
+01242 3     41            Push value of [NL]                                               4
+01245 3     37            Push value of [NE]                                               5
+01248 35    4 36 3        * 4 Params are above...                                          2
+01253 35    2 35 3        < 2 Params are above...                                          1
+01258 67    46            If ((< MAXLIMIT (* NR NC NL NE)))... else goto 1333              0
+01263 9     34               push "\nDies würde "                                          1
+01266 35    1 88 3           PRINC 1 Params are above...                                   1
+01271 A                      pop dummy (decrease stack)
+                                  0(PRINC "\nDies würde ")
+01272 3     42               Push value of [NC]                                            1
+01275 3     43               Push value of [NR]                                            2
+01278 3     41               Push value of [NL]                                            3
+01281 3     37               Push value of [NE]                                            4
+01284 35    4 36 3           * 4 Params are above...                                       1
+01289 32    1                push  01                                                      2
+01291 35    2 33 3           - 2 Params are above...                                       1
+01296 35    1 88 3           PRINC 1 Params are above...                                   1
+01301 A                      pop dummy (decrease stack)
+                                  0(PRINC (- (* NC NR NL NE) 1))
+01302 9     32               push " Objekte erzeugen, also die erlaubte Anzahl von "       1
+01305 35    1 88 3           PRINC 1 Params are above...                                   1
+01310 A                      pop dummy (decrease stack)
+                                  0(PRINC " Objekte erzeugen, also die erlaubte Anzahl von ")
+01311 3     3A               Push value of [MAXLIMIT]                                      1
+01314 35    1 88 3           PRINC 1 Params are above...                                   1
+01319 A                      pop dummy (decrease stack)
+                                  0(PRINC MAXLIMIT)
+01320 9     31               push " Objekten übersteigen, die durch die Umgebungsvariable M1
+01323 35    1 88 3           PRINC 1 Params are above...                                   1
+01328 57    352              goto 2183                                                     1
+01333 9     30               push "ORTHOMODE"                                              1
+01336 32    1                push  01                                                      2
+01338 35    2 77 3           SETVAR 2 Params are above...                                  1
+01343 A                      pop dummy (decrease stack)
+                                  0(SETVAR "ORTHOMODE" 1)
+01344 9     2F               push "HIGHLIGHT"                                              1
+01347 32    0                push  00                                                      2
+01349 35    2 77 3           SETVAR 2 Params are above...                                  1
+01354 A                      pop dummy (decrease stack)
+                                  0(SETVAR "HIGHLIGHT" 0)
+01355 32    0                push  00                                                      1
+01357 6     2E               setq FLAG 0                                                   0(setq FLAG 0)
+01360 3     43               Push value of [NR]                                            1
+01363 32    1                push  01                                                      2
+01365 35    2 74 3           /= 2 Params are above...                                      1
+01370 67    24               If ((/= NR 1))... else goto 1411                              0
+01375 32    1                   push  01                                                   1
+01377 32    2                   push  02                                                   2
+01379 35    2 69 3              + 2 Params are above...                                    1
+01384 35    1 68 3              INITGET 1 Params are above...                              1
+01389 A                         pop dummy (decrease stack)
+                               0(INITGET (+ 1 2))
+01390 9     2D                  push "\nZeilenabstand eingeben (---): "                    1
+01393 35    1 2C 3              GETDIST 1 Params are above...                              1
+01398 6     2B                  setq Y (GETDIST "\nZeilenabstand eingeben (---): ")        0(setq Y (GETDIST "\nZeilenabstand eingeben (---): "))
+01401 32    1                   push  01                                                   1
+01403 6     2E                  setq FLAG 1                                                0(setq FLAG 1)
+01406 57    0                   goto 1411                                                  0
+01411 3     42                  Push value of [NC]                                         1
+01414 32    1                push  01                                                      2
+01416 35    2 74 3           /= 2 Params are above...                                      1
+01421 67    2C               If ((/= Then OR Else 1))... else goto 1470                    0
+01426 32    1                   push  01                                                   1
+01428 32    2                   push  02                                                   2
+01430 35    2 69 3              + 2 Params are above...                                    1
+01435 35    1 68 3              INITGET 1 Params are above...                              1
+01440 A                         pop dummy (decrease stack)
+                               0(INITGET (+ 1 2))
+01441 9     2A                  push "\nSpaltenabstand eingeben (|||): "                   1
+01444 35    1 2C 3              GETDIST 1 Params are above...                              1
+01449 6     29                  setq X (GETDIST "\nSpaltenabstand eingeben (|||): ")       0(setq X (GETDIST "\nSpaltenabstand eingeben (|||): "))
+01452 3     2E                  Push value of [FLAG]                                       1
+01455 32    2                   push  02                                                   2
+01457 35    2 69 3              + 2 Params are above...                                    1
+01462 6     2E                  setq FLAG (+ FLAG 2)                                       0(setq FLAG (+ FLAG 2))
+01465 57    0                   goto 1470                                                  0
+01470 3     41                  Push value of [NL]                                         1
+01473 32    1                push  01                                                      2
+01475 35    2 74 3           /= 2 Params are above...                                      1
+01480 67    1F               If ((/= Then OR Else 1))... else goto 1516                    0
+01485 32    1                   push  01                                                   1
+01487 32    2                   push  02                                                   2
+01489 35    2 69 3              + 2 Params are above...                                    1
+01494 35    1 68 3              INITGET 1 Params are above...                              1
+01499 A                         pop dummy (decrease stack)
+                               0(INITGET (+ 1 2))
+01500 9     28                  push "\nEbenenabstand eingeben (...): "                    1
+01503 35    1 2C 3              GETDIST 1 Params are above...                              1
+01508 6     27                  setq Z (GETDIST "\nEbenenabstand eingeben (...): ")        0(setq Z (GETDIST "\nEbenenabstand eingeben (...): "))
+01511 57    0                   goto 1516                                                  0
+01516 9     26                  push "BLIPMODE"                                            1
+01519 32    0                push  00                                                      2
+01521 35    2 77 3           SETVAR 2 Params are above...                                  1
+01526 A                      pop dummy (decrease stack)
+                                  0(SETVAR Then OR Else 0)
+01527 32    1                push  01                                                      1
+01529 6     53               setq C 1                                                      0(setq C 1)
+01532 35    0 25 3           ENTLAST 0 Params are above...                                 1
+01537 6     24               setq EL (ENTLAST )                                            0(setq EL (ENTLAST ))
+01540 3     24               Push value of [EL]                                            1
+01543 35    1 23 3           ENTNEXT 1 Params are above...                                 1
+01548 6     22               setq EN (ENTNEXT EL)                                          0(setq EN (ENTNEXT EL))
+01551 3     22               Push value of [EN]                                            1
+01554 35    1 5B 3           NULL 1 Params are above...                                    1
+01559 35    1 21 3           NOT 1 Params are above...                                     1
+01564 67    16               If ((NOT (NULL EN)))... else goto 1591                        0
+01569 3     22                  Push value of [EN]                                         1
+01572 6     24                  setq EL EN                                                 0(setq EL EN)
+01575 3     24                  Push value of [EL]                                         1
+01578 35    1 23 3              ENTNEXT 1 Params are above...                              1
+01583 6     22                  setq EN (ENTNEXT EL)                                       0(setq EN (ENTNEXT EL))
+01586 57    FFFFFFD8            goto 1551                                                  0
+01591 3     53               Push value of [C]                                             2
+01594 3     41               Push value of [NL]                                            3
+01597 35    2 35 3           < 2 Params are above...                                       2
+01602 67    5D               If ((< C NL))... else goto 1700                               1
+01607 9     20                  push "_.COPY"                                              2
+01610 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+01616 A                         pop dummy (decrease stack)
+                               1(ads-cmd "_.COPY")
+01617 3     48                  Push value of [SS]                                         2
+01620 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+01626 A                         pop dummy (decrease stack)
+                               1(ads-cmd SS)
+01627 9     47                  push ""                                                    2
+01630 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+01636 A                         pop dummy (decrease stack)
+                               1(ads-cmd "")
+01637 9     1F                  push "0,0,0"                                               2
+01640 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+01646 A                         pop dummy (decrease stack)
+                               1(ads-cmd "0,0,0")
+01647 32    0                   push  00                                                   2
+01649 32    0                   push  00                                                   3
+01651 35    2 7C 3              LIST 2 Params are above...                                 2
+01656 3     53                  Push value of [C]                                          3
+01659 3     27                  Push value of [Z]                                          4
+01662 35    2 36 3              * 2 Params are above...                                    3
+01667 35    1 7C 3              LIST 1 Params are above...                                 3
+01672 35    2 7B 3              APPEND 2 Params are above...                               2
+01677 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+01683 A                         pop dummy (decrease stack)
+                               1(ads-cmd (APPEND (LIST 0 0) (LIST (* C Z))))
+01684 3     53                  Push value of [C]                                          2
+01687 35    1 1E 3              1+ 1 Params are above...                                   2
+01692 6     53                  setq C (1+ C)                                              1(setq C (1+ C))
+01695 57    FFFFFF93            goto 1591                                                  1
+01700 35    0 1D 3           SSADD 0 Params are above...                                   2
+01705 6     1C               setq SS2 (SSADD )                                             1(setq SS2 (SSADD ))
+01708 3     24               Push value of [EL]                                            2
+01711 35    1 23 3           ENTNEXT 1 Params are above...                                 2
+01716 6     1B               setq E (ENTNEXT EL)                                           1(setq E (ENTNEXT EL))
+01719 3     1B               Push value of [E]                                             2
+01722 67    91               If (E)... else goto 1872                                      1
+01727 3     1B                  Push value of [E]                                          2
+01730 35    1 1A 3              ENTGET 1 Params are above...                               2
+01735 6     19                  setq ED (ENTGET E)                                         1(setq ED (ENTGET E))
+01738 32    1                   push  01                                                   2
+01740 3     19                  Push value of [ED]                                         3
+01743 35    2 18 3              NTH 2 Params are above...                                  2
+01748 35    1 7A 3              CDR 1 Params are above...                                  2
+01753 9     17                  push "VERTEX"                                              3
+01756 35    2 65 3              = 2 Params are above...                                    2
+01761 68    39                  Cond If ((= (CDR (NTH 1 ED)) "VERTEX")) Goto 1823 Else .pop2(cond (= (CDR (NTH 1 ED)) "VERTEX") (
+01766 32    1                      push  01                                                2
+01768 3     19                     Push value of [ED]                                      3
+01771 35    2 18 3                 NTH 2 Params are above...                               2
+01776 35    1 7A 3                 CDR 1 Params are above...                               2
+01781 9     16                     push "ATTRIB"                                           3
+01784 35    2 65 3                 = 2 Params are above...                                 2
+01789 68    1D                     Cond If ((= (CDR (NTH 1 ED)) "ATTRIB")) Goto 1823 Else .2(cond (= (CDR (NTH 1 ED)) "ATTRIB") (
+01794 32    1                         push  01                                             2
+01796 3     19                        Push value of [ED]                                   3
+01799 35    2 18 3                    NTH 2 Params are above...                            2
+01804 35    1 7A 3                    CDR 1 Params are above...                            2
+01809 9     15                        push "SEQEND"                                        3
+01812 35    2 65 3                    = 2 Params are above...                              2
+01817 68    1                         Cond If ((= (CDR (NTH 1 ED)) "SEQEND")) Goto 1823 Els2(cond (= (CDR (NTH 1 ED)) "SEQEND") (
+01822 1                                  Push nil                                          2
+01822 1                               Cond If ((= (CDR (NTH 1 ED)) "SEQEND")) Goto 1823 Els2it's OR skip next 6 bytes -> 1829
+01822 1                            Cond If ((= (CDR (NTH 1 ED)) "ATTRIB")) Goto 1823 Else .2it's OR skip next 6 bytes -> 1829
+01822 1                         Cond If ((= (CDR (NTH 1 ED)) "VERTEX")) Goto 1823 Else .pop2it's OR skip next 6 bytes -> 1829
+01823 6A    1                   and_If (nil) .pop Else goto 1829                           2
+01828 2                            Push T                                                  2
+01829 35    1 21 3              NOT 1 Params are above...                                  2
+01834 67    11                  If ((NOT T))... else goto 1856                             1
+01839 3     1B                     Push value of [E]                                       2
+01842 3     1C                     Push value of [SS2]                                     3
+01845 35    2 1D 3                 SSADD 2 Params are above...                             2
+01850 A                            pop dummy (decrease stack)
+                            1(SSADD E SS2)
+01851 57    0                      goto 1856                                               1
+01856 3     1B                     Push value of [E]                                       2
+01859 35    1 23 3              ENTNEXT 1 Params are above...                              1
+01864 6     1B                  setq E (ENTNEXT Then OR Else)                              0(setq E (ENTNEXT Then OR Else))
+01867 57    FFFFFF67            goto 1719                                                  0
+01872 3     2E               Push value of [FLAG]                                          2
+01875 32    1                push  01                                                      3
+01877 35    2 65 3           = 2 Params are above...                                       2
+01882 68    D8               Cond If ((= FLAG 1)) Goto 2103 Else .pop                      2(cond (= FLAG 1) (
+01887 3     2E                  Push value of [FLAG]                                       2
+01890 32    2                   push  02                                                   3
+01892 35    2 65 3              = 2 Params are above...                                    2
+01897 68    74                  Cond If ((= FLAG 2)) Goto 2018 Else .pop                   2(cond (= FLAG 2) (
+01902 3     2E                     Push value of [FLAG]                                    2
+01905 32    3                      push  03                                                3
+01907 35    2 65 3                 = 2 Params are above...                                 2
+01912 68    6                      Cond If ((= FLAG 3)) Goto 1923 Else .pop                2(cond (= FLAG 3) (
+01917 1                               Push nil                                             2
+01918 57    5A                        goto 2013                                            2
+01918 57    5A                     Cond If ((= FLAG 3)) Goto 1923 Else .pop                2normal cond
+01923 A                            pop dummy (decrease stack)
+                            1nil
+01924 9     49                     push "_.ARRAY"                                          2
+01927 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01933 A                            pop dummy (decrease stack)
+                            1(ads-cmd "_.ARRAY")
+01934 3     48                     Push value of [SS]                                      2
+01937 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01943 A                            pop dummy (decrease stack)
+                            1(ads-cmd SS)
+01944 3     1C                     Push value of [SS2]                                     2
+01947 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01953 A                            pop dummy (decrease stack)
+                            1(ads-cmd SS2)
+01954 9     47                     push ""                                                 2
+01957 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01963 A                            pop dummy (decrease stack)
+                            1(ads-cmd "")
+01964 9     14                     push "_R"                                               2
+01967 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01973 A                            pop dummy (decrease stack)
+                            1(ads-cmd "_R")
+01974 3     43                     Push value of [NR]                                      2
+01977 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01983 A                            pop dummy (decrease stack)
+                            1(ads-cmd NR)
+01984 3     42                     Push value of [NC]                                      2
+01987 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+01993 A                            pop dummy (decrease stack)
+                            1(ads-cmd NC)
+01994 3     2B                     Push value of [Y]                                       2
+01997 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+02003 A                            pop dummy (decrease stack)
+                            1(ads-cmd Y)
+02004 3     29                     Push value of [X]                                       2
+02007 51    1 71 1                 ads-cmd 1 Params are above <- Convert to funcptr        2
+02013 57    50                     goto 2098                                               2
+02013 57    50                  Cond If ((= FLAG 2)) Goto 2018 Else .pop                   2normal cond
+02018 A                         pop dummy (decrease stack)
+                               1(ads-cmd X)
+02019 9     49                  push "_.ARRAY"                                             2
+02022 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02028 A                         pop dummy (decrease stack)
+                               1(ads-cmd "_.ARRAY")
+02029 3     48                  Push value of [SS]                                         2
+02032 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02038 A                         pop dummy (decrease stack)
+                               1(ads-cmd SS)
+02039 3     1C                  Push value of [SS2]                                        2
+02042 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02048 A                         pop dummy (decrease stack)
+                               1(ads-cmd SS2)
+02049 9     47                  push ""                                                    2
+02052 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02058 A                         pop dummy (decrease stack)
+                               1(ads-cmd "")
+02059 9     14                  push "_R"                                                  2
+02062 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02068 A                         pop dummy (decrease stack)
+                               1(ads-cmd "_R")
+02069 9     13                  push "1"                                                   2
+02072 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02078 A                         pop dummy (decrease stack)
+                               1(ads-cmd "1")
+02079 3     42                  Push value of [NC]                                         2
+02082 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02088 A                         pop dummy (decrease stack)
+                               1(ads-cmd NC)
+02089 3     29                  Push value of [X]                                          2
+02092 51    1 71 1              ads-cmd 1 Params are above <- Convert to funcptr           2
+02098 57    50                  goto 2183                                                  2
+02098 57    50               Cond If ((= FLAG 1)) Goto 2103 Else .pop                      2normal cond
+02103 A                      pop dummy (decrease stack)
+                                  1(ads-cmd X)
+02104 9     49               push "_.ARRAY"                                                2
+02107 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02113 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "_.ARRAY")
+02114 3     48               Push value of [SS]                                            2
+02117 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02123 A                      pop dummy (decrease stack)
+                                  1(ads-cmd SS)
+02124 3     1C               Push value of [SS2]                                           2
+02127 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02133 A                      pop dummy (decrease stack)
+                                  1(ads-cmd SS2)
+02134 9     47               push ""                                                       2
+02137 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02143 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "")
+02144 9     14               push "_R"                                                     2
+02147 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02153 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "_R")
+02154 3     43               Push value of [NR]                                            2
+02157 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02163 A                      pop dummy (decrease stack)
+                                  1(ads-cmd NR)
+02164 9     13               push "1"                                                      2
+02167 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02173 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "1")
+02174 3     2B               Push value of [Y]                                             2
+02177 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02183 19    C             clear 12 args+vars                                               1
+02186 16                  end Defun
+                                                      0
+02187 14    0 0 0 0       defun C:3DARRAY with 0 vars, Arg_min: 0, Arg_max: 0, do_cleanup: 0(defun C:3DARRAY
+02192 9     12            push '(OLDERR SS XX UNDO_SETTING)                                1
+02195 51    1 6C 1        _al-bind-alist 1 Params are above <- Convert to funcptr          1
+02201 A                   pop dummy (decrease stack)
+                                     0(_al-bind-alist '(OLDERR SS XX UNDO_SETTING))
+02202 9     11            push "cvport"                                                    1
+02205 35    1 7D 3        GETVAR 1 Params are above...                                     1
+02210 32    1             push  01                                                         2
+02212 35    2 65 3        = 2 Params are above...                                          1
+02217 6A    15            and_If ((= (GETVAR "cvport") 1)) .pop Else goto 2243             1
+02222 9     10               push "tilemode"                                               1
+02225 35    1 7D 3           GETVAR 1 Params are above...                                  1
+02230 32    0                push  00                                                      2
+02232 35    2 65 3           = 2 Params are above...                                       1
+02237 6A    1                and_If ((= (GETVAR "tilemode") 0)) .pop Else goto 2243        1
+02242 2                         Push T                                                     1
+02243 67    13            If (T)... else goto 2267                                         0
+02248 9     F                push "\n *** Unzulässiger Befehl im Papierbereich ***\n"      1
+02251 35    1 63 3           PROMPT 1 Params are above...                                  1
+02256 A                      pop dummy (decrease stack)
+                                  0(PROMPT "\n *** Unzulässiger Befehl im Papierbereich ***\n")
+02257 35    0 88 3           PRINC 0 Params are above...                                   1
+02262 57    F2               goto 2509                                                     1
+02267 3     89               Push value of [*ERROR*]                                       1
+02270 6     6E               setq OLDERR *ERROR*                                           0(setq OLDERR *ERROR*)
+02273 3     E                Push value of [3DAERR]                                        1
+02276 6     89               setq *ERROR* 3DAERR                                           0(setq *ERROR* 3DAERR)
+02279 9     D                push '("cmdecho" "blipmode" "highlight" "orthomode" "ucsfollow1
+02282 5F    1 79             jmp1 MODES at 121('("cmdecho" "blipmode" "highlight" "orthomod1
+02288 A                      pop dummy (decrease stack)
+                                  0Retval of jmp1 MODES at 121('("cmdecho" "blipmode" "highlight" "orthomode" "ucsfollow" "gridmode"))
+02289 9     C                push "CMDECHO"                                                1
+02292 32    0                push  00                                                      2
+02294 35    2 77 3           SETVAR 2 Params are above...                                  1
+02299 A                      pop dummy (decrease stack)
+                                  0(SETVAR "CMDECHO" 0)
+02300 35    0 B 3            AI_UNDO_ON 0 Params are above...                              1
+02305 A                      pop dummy (decrease stack)
+                                  0(AI_UNDO_ON )
+02306 9     72               push "_.UNDO"                                                 1
+02309 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              1
+02315 A                      pop dummy (decrease stack)
+                                  0(ads-cmd "_.UNDO")
+02316 9     A                push "_GROUP"                                                 1
+02319 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              1
+02325 A                      pop dummy (decrease stack)
+                                  0(ads-cmd "_GROUP")
+02326 35    0 9 3            GRAPHSCR 0 Params are above...                                1
+02331 A                      pop dummy (decrease stack)
+                                  0(GRAPHSCR )
+02332 1                      Push nil                                                      1
+02333 6     48               setq SS nil                                                   0(setq SS nil)
+02336 3     48               Push value of [SS]                                            1
+02339 35    1 5B 3           NULL 1 Params are above...                                    1
+02344 67    12               If ((NULL SS))... else goto 2367                              0
+02349 35    0 8 3               SSGET 0 Params are above...                                1
+02354 35    1 7 3               AI_SSGET 1 Params are above...                             1
+02359 6     48                  setq SS (AI_SSGET (SSGET ))                                0(setq SS (AI_SSGET (SSGET )))
+02362 57    FFFFFFE1            goto 2336                                                  0
+02367 32    0                push  00                                                      2
+02369 9     6                push "Rechteckige Polare Kreisförmige"                        3
+02372 35    2 68 3           INITGET 2 Params are above...                                 2
+02377 A                      pop dummy (decrease stack)
+                                  1(INITGET 0 "Rechteckige Polare Kreisförmige")
+02378 9     5                push "\nAnordnungstyp eingeben [Rechteckig/Polar] <R>:"       2
+02381 35    1 5D 3           GETKWORD 1 Params are above...                                2
+02386 6     4                setq XX (GETKWORD "\nAnordnungstyp eingeben [Rechteckig/Polar]1(setq XX (GETKWORD "\nAnordnungstyp eingeben [Rechteckig/Polar] <R>:"))
+02389 3     4                Push value of [XX]                                            2
+02392 9     3                push "Rechteckige"                                            3
+02395 35    2 2 3            EQ 2 Params are above...                                      2
+02400 68    F                Cond If ((EQ XX "Rechteckige")) Goto 2420 Else .pop           2(cond (EQ XX "Rechteckige") (
+02405 3     4                   Push value of [XX]                                         2
+02408 1                         Push nil                                                   3
+02409 35    2 2 3               EQ 2 Params are above...                                   2
+02414 68    1                   Cond If ((EQ XX nil)) Goto 2420 Else .pop                  2(cond (EQ XX nil) (
+02419 1                            Push nil                                                2
+02419 1                         Cond If ((EQ XX nil)) Goto 2420 Else .pop                  2it's OR skip next 6 bytes -> 2426
+02419 1                      Cond If ((EQ XX "Rechteckige")) Goto 2420 Else .pop           2it's OR skip next 6 bytes -> 2426
+02420 6A    1                and_If (nil) .pop Else goto 2426                              2
+02425 2                         Push T                                                     2
+02426 68    1A               Cond If (T) Goto 2457 Else .pop                               2(cond T (
+02431 3     1                   Push value of [T]                                          2
+02434 68    5                   Cond If (T) Goto 2444 Else .pop                            2(cond T (
+02439 57    8                      goto 2452                                               1
+02439 57    8                   Cond If (T) Goto 2444 Else .pop                            2normal cond
+02444 A                         pop dummy (decrease stack)
+                               1T
+02445 5F    0 199               jmp1 P-ARRAY at 409()                                      2
+02451 A                         pop dummy (decrease stack)
+                               1Retval of jmp1 P-ARRAY at 409()
+02452 57    8                   goto 2465                                                  1
+02452 57    8                Cond If (T) Goto 2457 Else .pop                               2normal cond
+02457 A                      pop dummy (decrease stack)
+                                  1Retval of jmp1 P-ARRAY at 409()
+02458 5F    0 392            jmp1 R-ARRAY at 914()                                         2
+02464 A                      pop dummy (decrease stack)
+                                  1Retval of jmp1 R-ARRAY at 914()
+02465 9     72               push "_.UNDO"                                                 2
+02468 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02474 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "_.UNDO")
+02475 9     70               push "_E"                                                     2
+02478 51    1 71 1           ads-cmd 1 Params are above <- Convert to funcptr              2
+02484 A                      pop dummy (decrease stack)
+                                  1(ads-cmd "_E")
+02485 35    0 6F 3           AI_UNDO_OFF 0 Params are above...                             2
+02490 A                      pop dummy (decrease stack)
+                                  1(AI_UNDO_OFF )
+02491 5F    0 E9             jmp1 MODER at 233()                                           2
+02497 A                      pop dummy (decrease stack)
+                                  1Retval of jmp1 MODER at 233()
+02498 3     6E               Push value of [OLDERR]                                        2
+02501 6     89               setq *ERROR* OLDERR                                           1(setq *ERROR* OLDERR)
+02504 35    0 88 3        PRINC 0 Params are above...                                      2
+02509 19    4             clear 4 args+vars                                                2
+02512 16                  end Defun
+                                                      0

@@ -1,16 +1,16 @@
 VERSION 5.00
 Begin VB.Form FrmSearch 
-   BorderStyle     =   4  'Fixed ToolWindow
+   BorderStyle     =   4  'Festes Werkzeugfenster
    Caption         =   "Search"
    ClientHeight    =   780
-   ClientLeft      =   45
-   ClientTop       =   9015
-   ClientWidth     =   3195
+   ClientLeft      =   8316
+   ClientTop       =   1056
+   ClientWidth     =   3192
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   780
-   ScaleWidth      =   3195
+   ScaleWidth      =   3192
    ShowInTaskbar   =   0   'False
    Begin VB.CheckBox Chk_CaseSensitiv 
       Caption         =   "Case Sensitiv"
@@ -26,7 +26,7 @@ Begin VB.Form FrmSearch
       Left            =   120
       TabIndex        =   1
       Top             =   480
-      Value           =   1  'Checked
+      Value           =   1  'Aktiviert
       Width           =   1335
    End
    Begin VB.ComboBox Combo1 
@@ -43,6 +43,13 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Dim myFormExtenter As FormExt_MostTop
+
+
+Private Sub Form_Initialize()
+   Set myFormExtenter = New FormExt_MostTop
+   myFormExtenter.Create Me
+End Sub
 
 Private Sub Combo1_Change()
 
@@ -84,5 +91,5 @@ End Sub
 Private Sub Form_Load()
    Me.Tag = Me.Caption
    
-   MostTop Me.Hwnd
+ '  MostTop Me.Hwnd
 End Sub

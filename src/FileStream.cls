@@ -14,13 +14,17 @@ Attribute VB_Exposed = False
 Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
 Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
-Public FileName As String
+Public Filename As String
 
 Public mvarhFile As Long
 Private mvarByteToBeRead As Long 'lokale Kopie
 Private mvarMaxPosition As Long 'lokale Kopie
 Public bIsTemporaryFile As Boolean
 Public Readonly As Boolean
+
+Public DisableMoveOnRead As Boolean
+Public DisableMoveOnWrite As Boolean
+
 
 Private CreationDisposition&
 Private Const GENERIC_WRITE = &H40000000
@@ -69,12 +73,27 @@ Private Enum SeekType
 End Enum
 
 Private Declare Function SetFilePointer Lib "kernel32" (ByVal hFile As Long, ByVal lDistanceToMove As Long, lpDistanceToMoveHigh As Long, ByVal dwMoveMethod As Long) As Long
+
+' An attempt was made to move the file pointer before the beginning of the file.
+Private Const ERROR_NEGATIVE_SEEK& = 131
+
+' The file pointer cannot be set on the specified device or file.
+Private Const ERROR_SEEK_ON_DEVICE& = 132
+
+
 Private Declare Function SetEndOfFile Lib "kernel32" (ByVal hFile As Long) As Long
 
-Private Retval As Long
+Private retval As Long
 Private bytesRead As Long
 Private Declare Function DeleteFile Lib "kernel32" Alias "DeleteFileA" (ByVal lpFileName As String) As Long
 Private Declare Function GetFileSize Lib "kernel32" (ByVal hFile As Long, lpFileSizeHigh As Long) As Long
+
+
+Private mData As New StringReader
+Private mMemOnlyMode As Boolean
+
+Private mPosOld&
+
 
 ''FileTime
 'Private Declare Function GetFileTime Lib "kernel32.dll" (ByVal hFile As Long, ByRef lpCreationTime As FileTime, ByRef lpLastAccessTime As FileTime, ByRef lpLastWriteTime As FileTime) As Long
@@ -96,6 +115,30 @@ Private Declare Function GetFileSize Lib "kernel32" (ByVal hFile As Long, lpFile
 '
 'End Property
 
+Public mStorePos As Long
+Private StorePosLock As Long
+
+Public Sub RestorePos()
+   If StorePosLock > 0 Then _
+      Dec StorePosLock _
+   Else _
+      Err.Raise vbObjectError, "FileStream::RestorePos", _
+               "There is no location stored. Use StorePos() to store one." & _
+               "Note: You can call RestorePos() only once."
+      
+   Position = mStorePos
+End Sub
+
+Public Sub StorePos()
+   If StorePosLock = 0 Then _
+      Inc StorePosLock _
+   Else _
+       Err.Raise vbObjectError, "FileStream::StorePos" _
+               , "There is already one location stored - call RestorePos() first so StorePos() will get free to use!"
+
+      
+   mStorePos = Position
+End Sub
 
 
 
@@ -117,12 +160,22 @@ End Function
 
 Public Property Get EOS() As Boolean
     EOS = Me.Length = Me.Position
+'    Debug.Assert mData.EOS = EOS
 End Property
 
 '// Set the EOS at the current position (= .position)
 Public Sub setEOS()
-   SetEndOfFile hFile
+
+   If mMemOnlyMode Then
+      mData.Truncate
+   Else
+   
+      SetEndOfFile hFile
+   End If
+
+   
    mvarMaxPosition = Position
+
 End Sub
 
 'Public Property Let FixedStringW(ByVal Length As Long, ByRef vData As String)
@@ -131,6 +184,10 @@ End Sub
 'End Property
 
 Public Property Get FixedStringW(ByVal Length As Long) As String
+
+   If mMemOnlyMode Then Stop ' Not implemented yet
+   
+   
    If Length = -1 Then
       Length = (Me.Length - Me.Position)
    End If
@@ -139,8 +196,11 @@ Public Property Get FixedStringW(ByVal Length As Long) As String
    FixedStringW = Space(Length)
    
  ' Read Fixed String
-   Retval = ReadFilePtr(hFile, StrPtr(FixedStringW), Length * 2, bytesRead, 0)
-   If Retval < 0 Then Err.Raise vbObjectError, , "ReadFileString failed."
+   retval = ReadFilePtr(hFile, StrPtr(FixedStringW), Length * 2, bytesRead, 0)
+   If retval < 0 Then Err.Raise vbObjectError, , "ReadFileString failed."
+   
+   If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+
 End Property
 
 
@@ -149,6 +209,12 @@ End Property
 
 
 Public Property Let FixedString(ByVal Length As Long, ByRef vData As String)
+   
+   If mMemOnlyMode Then
+      mData.FixedString(Length) = vData
+   Else
+   
+   
    If Length = -1 Then Length = Len(vData)
  ' deal with the case of negative FileOffsets
    If Me.Position < 0 Then
@@ -168,13 +234,27 @@ Public Property Let FixedString(ByVal Length As Long, ByRef vData As String)
 '         Exit Property
          
 '      End If
+
    End If
    
    
    If WriteFile(hFile, vData, Length, bytesRead, 0) <= 0 Then Err.Raise vbObjectError, , "Error in Property Let fixedString: Can't write data. Filestream::Readonly=" & Readonly
+   
+   
+   If DisableMoveOnWrite Then SeekToPosition bytesRead, FILE_CURRENT
+  
+   
+   End If
+
+
 End Property
 
 Public Property Get FixedString(ByVal Length As Long) As String
+   If mMemOnlyMode Then
+      FixedString = mData.FixedString(Length)
+   Else
+
+
    ' 'Length = -1' means read till end
    If Length = -1 Then
    ' deal with the case of negative FileOffsets
@@ -209,27 +289,65 @@ Public Property Get FixedString(ByVal Length As Long) As String
    
    
  ' create Buffer
+   On Error Resume Next
    FixedString = Space(Length)
    
+   
  ' Read Fixed String
-   Retval = ReadFile(hFile, FixedString, Length, bytesRead, 0)
-   If Retval < 0 Then Err.Raise vbObjectError, , "ReadFileString failed."
+   retval = ReadFile(hFile, FixedString, Length, bytesRead, 0)
+   If retval < 0 Then Err.Raise vbObjectError, , "ReadFileString failed."
+   
+   
    
  ' Limit buffer incase the file is smaller
    FixedString = Left(FixedString, bytesRead)
    
+   If Err Then
+      Dim tmp
+      tmp = "@FileStream::FixedString   Error allocating " & Length \ 1024 & " KB."
+      MsgBox tmp, vbCritical, Err.Description
+      
+      On Error GoTo 0
+      Err.Raise vbObjectError, , tmp
+      
+      
+   End If
+   
+   On Error GoTo 0
+   
+   If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+   
+   End If
 End Property
 
 Public Property Let char(ByRef vData As String)
-   FixedString(1) = vData
+
+   If mMemOnlyMode Then
+      mData.FixedString(1) = vData
+      
+   Else
+   
+      FixedString(1) = vData
+      
+   End If
 End Property
 
 Public Property Get char() As String
-   char = FixedString(1)
+
+   If mMemOnlyMode Then
+      char = mData.FixedString(1)
+   Else
+   
+      char = FixedString(1)
+   End If
 End Property
 
 
 Public Sub FindBytes(ParamArray Bytes())
+
+   If mMemOnlyMode Then Stop ' Not implemented yet
+   
+   
    Dim i
    i = LBound(Bytes)
    
@@ -246,6 +364,10 @@ Public Sub FindBytes(ParamArray Bytes())
 End Sub
 
 Public Function FindString&(StringToFind$, Optional SearchBackwards As Boolean = False, Optional VbCompareMethod As VbCompareMethod = vbBinaryCompare)
+
+   If mMemOnlyMode Then Stop ' Not implemented yet
+   
+   
    Dim tmp$, oldPos&
    oldPos = Position
       tmp = FixedString(-1)
@@ -280,6 +402,9 @@ Public Function FindString&(StringToFind$, Optional SearchBackwards As Boolean =
 End Function
 
 Public Function FindStrings(StringToFind$, Optional StopIfMoreThan& = &H7FFFFFFF) As Collection
+
+   If mMemOnlyMode Then Stop ' Not implemented yet
+   
    Set FindStrings = New Collection
    
    Dim tmp$, oldPos&
@@ -287,19 +412,19 @@ Public Function FindStrings(StringToFind$, Optional StopIfMoreThan& = &H7FFFFFFF
    Position = 0
    tmp = FixedString(-1)
    
-   Dim Offset&, item
-   Offset = 0
+   Dim offset&, item
+   offset = 0
    For Each item In Split(tmp, StringToFind, StopIfMoreThan)
       
-      Inc Offset, Len(item)
-      FindStrings.Add Offset
+      Inc offset, Len(item)
+      FindStrings.add offset
       
-      Inc Offset, Len(StringToFind)
+      Inc offset, Len(StringToFind)
    Next
-   FindStrings.Remove FindStrings.Count
+   FindStrings.Remove FindStrings.count
    
  ' Restore old position if not found
-   If FindStrings.Count = 0 Then Position = oldPos
+   If FindStrings.count = 0 Then Position = oldPos
    
 End Function
 
@@ -307,6 +432,15 @@ End Function
 
 Public Function getTerminatedString(ParamArray TerminatorStrings()) As String
 
+
+   If mMemOnlyMode Then
+      Debug.Assert TerminatorStrings(0) = Chr(0)
+      getTerminatedString = mData.zeroString()
+   
+   
+   
+   Else
+   
   'For i = LBound(TerminatorStrings) To UBound(TerminatorStrings)
   'If Len(TerminatorString) = 0 Then Exit Function...
 
@@ -317,6 +451,9 @@ Public Function getTerminatedString(ParamArray TerminatorStrings()) As String
   value = " "
 
   Dim i&
+  
+  '... because it's not implemented for that methode
+  Debug.Assert DisableMoveOnRead = False
 
 ' Begin of FileRead-Loop
   Do
@@ -363,6 +500,7 @@ Public Function getTerminatedString(ParamArray TerminatorStrings()) As String
    Loop Until Me.EOS
      
 
+   End If
 
 End Function
 
@@ -447,49 +585,107 @@ End Property
 
 
 Public Property Let int32(ByRef vData As Long)
-    Dim Retval&
+
+   If mMemOnlyMode Then Stop ' Not implemented yet
+
+    Dim retval&
     Dim bytesWritten&
     Dim tmp$
     tmp = LngtoStr(vData)
-    Retval = WriteFile(hFile, tmp, 4, bytesWritten, 0)
+    retval = WriteFile(hFile, tmp, 4, bytesWritten, 0)
     If bytesWritten <> 4 Then
       Err.Raise vbObjectError, "", "Let_int32: WriteFile failed! Readonly=" & CBool(vbReadOnly)
     End If
 
+   If DisableMoveOnWrite Then SeekToPosition bytesWritten, FILE_CURRENT
 
 End Property
 
 
 Public Property Get int32() As Long
+   
+   
+   If mMemOnlyMode Then
+   
+      int32 = mData.int32
+   Else
 
 '    Dim bytesRead&, value As Long
 '    bytesRead = ReadFileLong(hFile, value, 4, bytesRead, 0)
 '    int32 = value
 
-  Dim Retval&, bytesRead&
-  Retval = ReadFileLong(hFile, int32, 4, bytesRead, 0)
-  If bytesRead <> 4 Then MsgBox "[File::int32] Only '" & bytesRead & "' bytes read instead of 4! RetVal: " & Retval, vbCritical
+  Dim retval&, bytesRead&
+  retval = ReadFileLong(hFile, int32, 4, bytesRead, 0)
+  If bytesRead <> 4 Then MsgBox "[File::int32] Only '" & bytesRead & "' bytes read instead of 4! RetVal: " & retval, vbCritical
+  
+  End If
+  
+' values are maybe not unsigned plz Test
+  Debug.Assert int32 >= 0
+  
+  If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+
+  
 End Property
 
+Public Property Get int32Sig() As Long
+
+   If mMemOnlyMode Then
+   
+      int32Sig = mData.int32Sig
+   Else
 
 
-Public Property Let int16(ByRef vData As Integer)
+  Dim retval&, bytesRead&
+  retval = ReadFileLong(hFile, int32Sig, 4, bytesRead, 0)
+  If bytesRead <> 4 Then MsgBox "[File::int32] Only '" & bytesRead & "' bytes read instead of 4! RetVal: " & retval, vbCritical
+  
+  End If
+  
+  ' values are maybe not signed plz Test
+  Debug.Assert int32Sig < &H7FFFFFFF
+
+  If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+
+
+  
+End Property
+
+Public Property Let int16(ByRef vData As Long)
       Stop
 End Property
 
 
-Public Property Get int16() As Integer
-    Dim bytesRead&, value As Long
-    bytesRead = ReadFileLong(hFile, value, 2, bytesRead, 0)
+Public Property Get int16Sig() As Integer
+    Dim value As Long
+    value = int16()
+   
     ' 54298
-    If value And &H8000 Then
-       int16 = (value And &H7FFF) Or &H8000
+    '  int16sig = value Or -(value And &H8000&)  '-32768 '&H8000
+    If value And &H8000& Then
+       int16Sig = (value And &H7FFF) Or &H8000&
     Else
-       int16 = value
+       int16Sig = value
     End If
 End Property
 
+Public Property Get int16() As Long
+    
 
+    Dim bytesRead&, value As Long
+    
+    If mMemOnlyMode Then 'Stop ' Not implemented yet
+       value = mData.int16
+    Else
+       bytesRead = ReadFileLong(hFile, value, 2, bytesRead, 0)
+    
+    End If
+    
+    If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+   
+    int16 = value
+    
+End Property
 
 Public Property Let DoubleValue(ByRef vData As Double)
 
@@ -507,23 +703,23 @@ End Property
 
 Public Property Get DoubleValue() As Double
 
-'    Dim bytesRead&, value As Long
-'    bytesRead = ReadFileLong(hFile, value, 4, bytesRead, 0)
-'    int32 = value
+  If mMemOnlyMode Then Stop ' Not implemented yet
 
   Dim bytesRead
   bytesRead = ReadFileDouble(hFile, DoubleValue, 8, bytesRead, 0)
+  If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+
 End Property
 
 
 Public Property Get int64Value() As Currency
 
-'    Dim bytesRead&, value As Long
-'    bytesRead = ReadFileLong(hFile, value, 4, bytesRead, 0)
-'    int32 = value
-
+  If mMemOnlyMode Then Stop ' Not implemented yet
+   
   Dim bytesRead
   bytesRead = ReadFileInt64(hFile, int64Value, 8, bytesRead, 0)
+  If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
+
 End Property
 
 
@@ -532,40 +728,71 @@ End Property
 '////////////////////////////////////////
 '//  Let position Property
 Public Property Let Position(ByVal vData As Long)
+
+   If mMemOnlyMode Then
+      mData.Position = vData
+   Else
+   
    SeekToPosition vData, FILE_BEGIN
+   
+   End If
 End Property
 '//  Get position Property
 Public Property Get Position() As Long
 Attribute Position.VB_UserMemId = 0
+
+   If mMemOnlyMode Then
+      Position = mData.Position
+   Else
+
    Position = SetFilePointer(hFile, 0, 0, FILE_CURRENT)
    If Position < 0 Then
 '      MsgBox "Error on GetFilePointer, FilePointer is before beginning: " & Position, vbCritical
 '      Me.Position = 0 'SetFilePointer hFile, 0, 0, FILE_BEGIN
    End If
 '  position = mvarposition
+
+   End If
 End Property
 
 
 '////////////////////////////////////////
 '//  Let PositionEOFRelated Property
 Public Property Let PositionEOFRelated(ByVal vData As Long)
+   If mMemOnlyMode Then
+      Err.Raise 0, , "Not supported/implemented yet for MemMode!"
+   Else
+
+
    SeekToPosition vData * -1, FILE_END
   
   'For some stupid reason it requires SetFilePointer( with FILE_BEGIN)
   ' or next fileRead will fail
    Position = Position
+   End If
 End Property
 
 
-Private Sub SeekToPosition(Offset&, SeekType As SeekType)
-   
-   Dim Retval&
-   Retval = SetFilePointer(hFile, Offset, 0, SeekType)
-   If Retval < 0 Then
-'      MsgBox "Error on SetFilePointer, FilePointer is before beginning: " & Offset, vbCritical
-'      Me.Position = 0
+Private Sub SeekToPosition(offset&, SeekType As SeekType)
+   If mMemOnlyMode Then
+      mData.Position = offset
+      Debug.Assert SeekType = FILE_BEGIN
    Else
-      mvarMaxPosition = Max(mvarMaxPosition, Retval)
+
+   Dim retval&
+   retval = SetFilePointer(hFile, offset, 0, SeekType)
+   If retval <> ERROR_NEGATIVE_SEEK Then
+   
+      If Err.LastDllError Then
+         MsgBox "Error on SetFilePointer, Offset: " & offset & "  SeekType: " & SeekType & vbCrLf & _
+                "LastDllError: " & Err.LastDllError, _
+                vbCritical
+      End If
+      
+   Else
+      mvarMaxPosition = Max(mvarMaxPosition, retval)
+   End If
+   
    End If
 End Sub
 
@@ -594,7 +821,7 @@ Private Property Let hFile(ByVal vData As Long)
       
     ' DeleteFile if it is opened as Temporary
       If bIsTemporaryFile Then
-         DeleteFile FileName
+         DeleteFile Filename
       End If
       
    End If
@@ -607,21 +834,29 @@ End Property
 
 Public Property Get hFile() As Long
    
+   Dim mShare
+   mShare = FILE_SHARE_READ Or FILE_SHARE_WRITE Or FILE_SHARE_DELETE
+   
  ' If no file handle(mvarhFile = 0) get one.
    If mvarhFile = -1 Then
      'Open file as with new file handle
-      mvarhFile = CreateFile(FileName, _
+      mvarhFile = CreateFile(Filename, _
                               GENERIC_READ Or (GENERIC_WRITE And Not (Readonly)), _
-                              FILE_SHARE_READ Or FILE_SHARE_WRITE Or FILE_SHARE_DELETE, _
+                              mShare, _
                               0, CreationDisposition, _
                               FileFlagsAndAttributes, 0)
       If mvarhFile = -1 Then
+      
          On Error Resume Next
          Dim tmptxt$
-         tmptxt = IIf(GetAttr(FileName) And vbReadOnly, "File is write protected.", "File is in use.")
+         tmptxt = IIf(GetAttr(Filename) And vbReadOnly, "File is write protected.", "File is in use.")
+         
          If Err Then tmptxt = Err.Description
          On Error GoTo 0
-         Err.Raise ERR_OPENFILE, , "Can't open " & FileName & " for read" & IIf(Readonly, "", "/write") & " access. " & tmptxt
+         Err.Raise ERR_OPENFILE, , "Open file for read" & _
+                  IIf(Readonly, "", "/write") & " shareflags: 0x" & H32(mShare) & _
+                  " access fail. " & tmptxt
+         '" & Filename
       End If
    End If
 
@@ -636,11 +871,18 @@ End Property
 '////////////////////////////////////////
 '//  Get Length Property
 Public Property Get Length() As Long
+
+   If mMemOnlyMode Then
+      mvarMaxPosition = mData.Length
+   Else
 '->TODO: Cache lenght of file in a variable)
     mvarMaxPosition = GetFileSize(hFile, 0)
+   End If
+    
     Length = mvarMaxPosition
 '    Length = Max(mvarMaxPosition, GetFileSize(mvarhFile, 0), Me.Position)
 '    Length = Max(mvarMaxPosition, FileLen(FileName), Me.Position)
+
 End Property
 
 
@@ -650,28 +892,93 @@ End Property
 '////////////////////////////////////////
 '//  Let Data Property
 Public Property Let int8(vData As Long) 'Offset&, lenght&, ByRef vData As String)
+
+   If mMemOnlyMode Then
+      mData.int8 = vData
+   Else
+    
+    
+    
     Dim bytesWritten&
     Dim tmp$
     tmp = LngtoStr(vData)
 
+    
     WriteFile hFile, tmp, 1, bytesWritten, 0
+    Debug.Assert bytesWritten = 1
+    
+    If DisableMoveOnWrite Then SeekToPosition bytesWritten, FILE_CURRENT
+
+    End If
 End Property
 '//  Get Data Property
 Public Property Get int8() As Long '(Offset&, lenght&)
+   If mMemOnlyMode Then
+      int8 = mData.int8
+   Else
+
     Dim bytesRead&
     Dim tmp$
     tmp = " "
-    Retval = ReadFile(hFile, tmp, 1, bytesRead, 0)
+    retval = ReadFile(hFile, tmp, 1, bytesRead, 0)
+    If bytesRead <> 1 Then
+      Debug.Print Err.LastDllError
+      Stop
+    End If
     int8 = Asc(tmp)
+    
+    If DisableMoveOnRead Then SeekToPosition -bytesRead, FILE_CURRENT
+
+
+    End If
+
 End Property
+          
+'////////////////////////////////////////
+'//  Let Data Property
+Public Property Let int8Sig(vData As Integer) 'Offset&, lenght&, ByRef vData As String)
+
+   If mMemOnlyMode Then
+   Stop
+      'mData.int8Sig = vData
+   Else
+    
+    Dim bytesWritten&
+    Dim tmp$
+    tmp = LngtoStr(CLng(vData))
+
+    WriteFile hFile, tmp, 1, bytesWritten, 0
+    If DisableMoveOnWrite Then SeekToPosition bytesWritten, FILE_CURRENT
+    
+    End If
+End Property
+'//  Get Data Property
+Public Property Get int8Sig() As Integer '(Offset&, lenght&)
+   If mMemOnlyMode Then
+      int8Sig = mData.int8Sig
+   Else
+
+      Dim tmp
+      tmp = int8()
+
+'    int8Sig = int8Sig Or -(int8Sig And &H80)
+   ' convert unsigned char to signed char
+     If tmp > &H7F Then
+        int8Sig = (tmp And &H7F) Or &HFF80
+     End If
+
+    End If
+
+End Property
+          
 
 
 
 '////////////////////////////////////////
 '//  Create
-Public Sub Create(FileName As String, Optional bDeleteExistingFile As Boolean, Optional bTemporaryFile As Boolean, Optional Readonly As Boolean)
+Public Sub Create(Filename As String, Optional bDeleteExistingFile As Boolean, Optional bTemporaryFile As Boolean, Optional Readonly As Boolean)
    CloseFile
-   Me.FileName = FileName
+   Me.Filename = Filename
    Me.Readonly = Readonly
    If bDeleteExistingFile Then
       CreationDisposition = CREATE_ALWAYS
@@ -833,14 +1140,106 @@ Public Sub Move(BytesToMoveFromCurPos&)
 End Sub
 
 
-Public Property Let Data(ByRef vData As String)
+Public Property Let data(ByRef vData As String)
+   Position = 0
    FixedString(-1) = vData
    Position = 0
 End Property
 
-Public Property Get Data() As String
-   Data = FixedString(-1)
+Public Property Get data() As String
+   Position = 0
+   data = FixedString(-1)
    Position = 0
 End Property
+
+
+
+Public Property Get MemOnlyMode() As Variant
+   MemOnlyMode = mMemOnlyMode
+End Property
+
+Public Property Let MemOnlyMode(ByVal vNewValue As Variant)
+   
+   If vNewValue Then
+      MemOnlyOn
+   Else
+      MemOnlyOff
+   End If
+
+End Property
+
+
+
+Private Sub MemOnlyOn()
+'   Debug.Assert mMemOnlyMode = False
+   
+   If mMemOnlyMode = True Then
+      Debug.Print "MemOnly Mode already enabled"
+      Exit Sub
+   End If
+   mMemOnlyMode = False
+   
+ ' Store old Position
+   mPosOld = Position
+   
+   MemReFill
+   
+   
+' Restore old position
+  Position = mPosOld
+  
+   
+End Sub
+Private Sub MemOnlyOff()
+   Debug.Assert mMemOnlyMode = True
+ 
+ ' Store old Position
+   mPosOld = Position
+   
+   MemFlush
+   
+' Restore old position
+  Position = mPosOld
+End Sub
+
+Private Sub MemReFill()
+ 'Read whole file into buffer
+   Position = 0
+   mData.mvardata = FixedString(-1)
+   
+   mMemOnlyMode = True
+
+End Sub
+Private Sub MemFlush()
+
+   mMemOnlyMode = False
+
+ ' Write buffer back into file
+   StorePos
+   
+   
+   Position = 0
+   FixedString(-1) = mData.mvardata
+   
+   SetEndOfFile hFile
+   
+   
+   RestorePos
+
+   
+End Sub
+
+
+Public Sub WriteChanges()
+  
+  'only working if OnlyMode is on
+   Debug.Assert mMemOnlyMode = True
+
+   mMemOnlyMode = False
+   MemFlush
+   mMemOnlyMode = True
+   
+End Sub
+
 
 

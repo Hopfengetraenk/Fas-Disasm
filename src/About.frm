@@ -1,15 +1,15 @@
 VERSION 5.00
 Begin VB.Form About 
    Caption         =   "About"
-   ClientHeight    =   3195
-   ClientLeft      =   1635
-   ClientTop       =   4230
+   ClientHeight    =   3192
+   ClientLeft      =   3540
+   ClientTop       =   2964
    ClientWidth     =   4680
    Icon            =   "About.frx":0000
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   3195
+   ScaleHeight     =   3192
    ScaleWidth      =   4680
    ShowInTaskbar   =   0   'False
    Begin VB.TextBox Text1 
@@ -34,12 +34,12 @@ Begin VB.Form About
    Begin VB.Label Label4 
       AutoSize        =   -1  'True
       BackStyle       =   0  'Transparent
-      Caption         =   "in Nov 2005 ( Minor Update Dez 2013)"
-      Height          =   195
+      Caption         =   "in Nov 2005 ( Updated Feb 2018)"
+      Height          =   192
       Left            =   1680
       TabIndex        =   4
       Top             =   720
-      Width           =   2745
+      Width           =   2328
    End
    Begin VB.Label Label3 
       AutoSize        =   -1  'True
@@ -60,13 +60,13 @@ Begin VB.Form About
    Begin VB.Label Label19 
       AutoSize        =   -1  'True
       BackStyle       =   0  'Transparent
-      Caption         =   "http://acad-fas.tipido.net/"
+      Caption         =   "https://github.com/Djamana/Fas-Disasm"
       ForeColor       =   &H00FF0000&
-      Height          =   195
+      Height          =   192
       Left            =   360
       TabIndex        =   2
       Top             =   960
-      Width           =   1845
+      Width           =   2976
    End
    Begin VB.Label Label2 
       AutoSize        =   -1  'True
@@ -85,8 +85,8 @@ Begin VB.Form About
       Caption         =   "label(0)"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   9.75
-         Charset         =   0
+         Size            =   9.6
+         Charset         =   222
          Weight          =   400
          Underline       =   0   'False
          Italic          =   0   'False
@@ -119,5 +119,5 @@ Private Sub Label19_Click()
 End Sub
 
 Private Sub Label2_Click()
-   ShellExecute 0, "open", "http://lisp-decompiler-project.cjb.net", "", "", 0
+   ShellExecute 0, "open", Label2.Caption, "", "", 0
 End Sub

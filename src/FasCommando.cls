@@ -15,11 +15,23 @@ Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
 Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
 
-Public Tag As Variant
+Public ModulId As Variant
 Public Position As Long
+
+Public Stack_Pointer_before
+Public Stack_Pointer_After
+
+Public Stack_Before
+Public Stack_After
+
+Public Disassembled_Short As String
+Public Description As String
+
+
 Private mvarCommando As Long
 Private mvarParameters As Collection
 Private mvarDisassembled As String
+
 'lokale Variable(n) zum Zuweisen der Eigenschaft(en)
 Private mvarInterpreted As String 'lokale Kopie
 Public Property Let Interpreted(ByVal vData As String)

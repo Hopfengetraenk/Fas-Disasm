@@ -1,203 +1,305 @@
 VERSION 5.00
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Begin VB.Form FrmMain 
-   ClientHeight    =   7920
+   ClientHeight    =   7992
    ClientLeft      =   120
-   ClientTop       =   630
-   ClientWidth     =   11355
+   ClientTop       =   636
+   ClientWidth     =   11748
    Icon            =   "frmMain.frx":0000
    LinkTopic       =   "Form1"
-   OLEDropMode     =   1  'Manual
-   ScaleHeight     =   7920
-   ScaleWidth      =   11355
-   Begin VB.Timer Timer_Winhex 
-      Enabled         =   0   'False
-      Interval        =   100
-      Left            =   8280
+   OLEDropMode     =   1  'Manuell
+   ScaleHeight     =   7992
+   ScaleWidth      =   11748
+   Begin MSComctlLib.Slider Slider_Zoom 
+      Height          =   432
+      Left            =   1440
+      TabIndex        =   0
+      ToolTipText     =   "Zoom Listview"
       Top             =   0
+      Width           =   252
+      _ExtentX        =   445
+      _ExtentY        =   762
+      _Version        =   393216
+      MousePointer    =   15
+      Orientation     =   1
+      Min             =   40
+      Max             =   100
+      SelStart        =   44
+      TickStyle       =   3
+      TickFrequency   =   20
+      Value           =   44
    End
-   Begin VB.CheckBox Chk_cleanup 
-      Caption         =   "CleanUp"
-      Height          =   195
-      Left            =   9600
-      TabIndex        =   13
-      ToolTipText     =   "Deletes temporary files (*.fct; *.res; *.key)"
-      Top             =   120
-      Value           =   1  'Checked
-      Width           =   1740
+   Begin MSComctlLib.ProgressBar ProgressBar1 
+      Height          =   252
+      Left            =   4680
+      TabIndex        =   14
+      Top             =   600
+      Visible         =   0   'False
+      Width           =   6612
+      _ExtentX        =   11663
+      _ExtentY        =   445
+      _Version        =   393216
+      Appearance      =   0
    End
-   Begin VB.CheckBox chk_Decryptonly 
-      Caption         =   "Decrypt only"
-      Height          =   195
-      Left            =   6240
-      TabIndex        =   11
-      ToolTipText     =   "Decrypt Resoures only - Don't interpret file."
-      Top             =   90
-      Width           =   1260
-   End
-   Begin VB.CheckBox chk_verbose 
-      Caption         =   "Verbose"
-      Height          =   195
-      Left            =   5160
-      TabIndex        =   10
-      ToolTipText     =   "Disable to speed up decrypting"
-      Top             =   90
-      Width           =   900
-   End
-   Begin VB.CheckBox chk_Progressbar 
-      Caption         =   "Progressbar"
-      Height          =   255
-      Left            =   3960
-      TabIndex        =   9
-      ToolTipText     =   "Disable to speed up decrypting"
-      Top             =   90
-      Value           =   1  'Checked
-      Width           =   1260
-   End
-   Begin VB.CheckBox ChkLog 
-      Caption         =   "Log"
-      Height          =   255
-      Left            =   3240
-      MaskColor       =   &H8000000F&
-      TabIndex        =   8
-      ToolTipText     =   "Show Log Window"
-      Top             =   90
-      Width           =   660
-   End
-   Begin VB.CheckBox Chk_HexWork 
-      Caption         =   "use HexWorkShop"
-      Height          =   195
-      Left            =   7800
+   Begin VB.CheckBox Chk_Cancel 
+      Caption         =   "Cancel"
+      Height          =   330
+      Left            =   10080
+      Style           =   1  'Grafisch
       TabIndex        =   12
-      ToolTipText     =   "Opens HexWorkshop when you select a FAS command"
-      Top             =   90
-      Width           =   1740
-   End
-   Begin VB.Timer Timer_DropStart 
-      Enabled         =   0   'False
-      Interval        =   100
-      Left            =   9720
       Top             =   0
+      Width           =   1215
    End
    Begin VB.CommandButton cmd_forward 
       Caption         =   "Forward >>>"
       Enabled         =   0   'False
       Height          =   375
       Left            =   1590
-      TabIndex        =   7
+      TabIndex        =   2
       ToolTipText     =   "Insert or '-'"
       Top             =   60
       Width           =   1575
+   End
+   Begin VB.Frame Frame1 
+      BorderStyle     =   0  'Kein
+      Height          =   600
+      Left            =   3240
+      TabIndex        =   3
+      Top             =   0
+      Width           =   7572
+      Begin VB.CheckBox chk_Inspector 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         Caption         =   "Inspector"
+         ForeColor       =   &H80000008&
+         Height          =   312
+         Left            =   3120
+         MaskColor       =   &H8000000F&
+         Style           =   1  'Grafisch
+         TabIndex        =   8
+         ToolTipText     =   "Shows Inspector Window"
+         Top             =   120
+         Value           =   2  'Zwischenzustand
+         Width           =   1020
+      End
+      Begin VB.CheckBox chk_Search 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         Caption         =   "Search"
+         ForeColor       =   &H80000008&
+         Height          =   312
+         Left            =   1440
+         Style           =   1  'Grafisch
+         TabIndex        =   6
+         ToolTipText     =   "Search for commands"
+         Top             =   120
+         Width           =   900
+      End
+      Begin VB.CheckBox ChkLog 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         Caption         =   "Log"
+         ForeColor       =   &H80000008&
+         Height          =   312
+         Left            =   2400
+         MaskColor       =   &H80000005&
+         Style           =   1  'Grafisch
+         TabIndex        =   7
+         ToolTipText     =   "Shows Log Window"
+         Top             =   120
+         Value           =   2  'Zwischenzustand
+         Width           =   660
+      End
+      Begin VB.CheckBox Chk_HexWork 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         Caption         =   "HexWorkShop"
+         ForeColor       =   &H80000008&
+         Height          =   312
+         Left            =   4200
+         Style           =   1  'Grafisch
+         TabIndex        =   9
+         ToolTipText     =   "Opens HexWorkshop when you select a FAS command"
+         Top             =   120
+         Width           =   1260
+      End
+      Begin VB.CheckBox chk_Progressbar 
+         Caption         =   "Progressbar"
+         Height          =   195
+         Left            =   5520
+         TabIndex        =   5
+         ToolTipText     =   "Disable to speed up decrypting"
+         Top             =   0
+         Value           =   1  'Aktiviert
+         Width           =   1260
+      End
+      Begin VB.CheckBox chk_verbose 
+         Caption         =   "Verbose"
+         Height          =   195
+         Left            =   5520
+         TabIndex        =   11
+         ToolTipText     =   "Disable to speed up decrypting"
+         Top             =   240
+         Width           =   1020
+      End
+      Begin VB.CheckBox chk_Decryptonly 
+         Caption         =   "Decrypt only"
+         Height          =   195
+         Left            =   120
+         TabIndex        =   4
+         ToolTipText     =   $"frmMain.frx":030A
+         Top             =   0
+         Width           =   1260
+      End
+      Begin VB.CheckBox Chk_cleanup 
+         Caption         =   "CleanUp"
+         Height          =   195
+         Left            =   120
+         TabIndex        =   10
+         ToolTipText     =   "Deletes temporary files (*.fct; *.res; *.key)"
+         Top             =   240
+         Value           =   1  'Aktiviert
+         Width           =   1020
+      End
+   End
+   Begin VB.Timer Timer_Winhex 
+      Enabled         =   0   'False
+      Interval        =   100
+      Left            =   9240
+      Top             =   120
+   End
+   Begin VB.Timer Timer_DropStart 
+      Enabled         =   0   'False
+      Interval        =   100
+      Left            =   11040
+      Top             =   240
    End
    Begin VB.CommandButton cmd_back 
       Caption         =   "Back <<<"
       Enabled         =   0   'False
       Height          =   375
       Left            =   30
-      TabIndex        =   6
+      TabIndex        =   1
       ToolTipText     =   "Backspace or '-'"
       Top             =   60
       Width           =   1575
    End
-   Begin MSComctlLib.ListView ListView1 
-      Height          =   6975
+   Begin MSComctlLib.ListView LV_Log 
+      Height          =   6492
       Left            =   0
-      TabIndex        =   5
-      Top             =   480
+      TabIndex        =   15
+      Top             =   960
       Visible         =   0   'False
-      Width           =   11295
-      _ExtentX        =   19923
-      _ExtentY        =   12303
+      Width           =   11292
+      _ExtentX        =   19918
+      _ExtentY        =   11451
       View            =   3
-      LabelEdit       =   1
-      MultiSelect     =   -1  'True
-      LabelWrap       =   -1  'True
+      LabelWrap       =   0   'False
       HideSelection   =   0   'False
       AllowReorder    =   -1  'True
       FullRowSelect   =   -1  'True
       _Version        =   393217
       ForeColor       =   -2147483640
       BackColor       =   -2147483643
-      BorderStyle     =   1
       Appearance      =   1
-      NumItems        =   6
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "MS Sans Serif"
+         Size            =   7.8
+         Charset         =   222
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      NumItems        =   8
       BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
-         Text            =   "Position"
-         Object.Width           =   1111
+         Key             =   "id"
+         Text            =   "#"
+         Object.Width           =   353
       EndProperty
       BeginProperty ColumnHeader(2) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Alignment       =   1
          SubItemIndex    =   1
-         Text            =   "Command"
-         Object.Width           =   741
+         Key             =   "pos"
+         Text            =   "Pos"
+         Object.Width           =   1358
       EndProperty
       BeginProperty ColumnHeader(3) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Alignment       =   1
          SubItemIndex    =   2
-         Text            =   "Parameter"
-         Object.Width           =   2540
+         Key             =   "cmd"
+         Text            =   "Cmd"
+         Object.Width           =   741
       EndProperty
       BeginProperty ColumnHeader(4) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
          SubItemIndex    =   3
-         Text            =   "Disassembler"
-         Object.Width           =   6350
+         Key             =   "disasm"
+         Text            =   "Disasm"
+         Object.Width           =   1729
       EndProperty
       BeginProperty ColumnHeader(5) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Alignment       =   1
          SubItemIndex    =   4
-         Text            =   "ESP"
-         Object.Width           =   2540
+         Key             =   "params"
+         Text            =   "Params"
+         Object.Width           =   1235
       EndProperty
       BeginProperty ColumnHeader(6) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         Alignment       =   1
          SubItemIndex    =   5
+         Key             =   "sp"
+         Text            =   "SP"
+         Object.Width           =   1058
+      EndProperty
+      BeginProperty ColumnHeader(7) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   6
+         Key             =   "descr"
+         Text            =   "Description"
+         Object.Width           =   7056
+      EndProperty
+      BeginProperty ColumnHeader(8) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+         SubItemIndex    =   7
+         Key             =   "decomp"
          Text            =   "Decompiled"
-         Object.Width           =   6068
+         Object.Width           =   7056
       EndProperty
    End
-   Begin VB.CheckBox Chk_Cancel 
-      Caption         =   "Cancel"
-      Height          =   330
-      Left            =   10080
-      Style           =   1  'Graphical
-      TabIndex        =   4
-      Top             =   0
-      Width           =   1215
-   End
-   Begin MSComctlLib.ProgressBar ProgressBar1 
-      Height          =   255
-      Left            =   360
-      TabIndex        =   3
-      Top             =   7080
-      Visible         =   0   'False
-      Width           =   10575
-      _ExtentX        =   18653
-      _ExtentY        =   450
-      _Version        =   393216
-      Appearance      =   1
-   End
    Begin MSComctlLib.StatusBar StatusBar1 
-      Align           =   2  'Align Bottom
-      Height          =   345
+      Align           =   2  'Unten ausrichten
+      Height          =   348
       Left            =   0
-      TabIndex        =   2
-      Top             =   7575
-      Width           =   11355
-      _ExtentX        =   20029
-      _ExtentY        =   609
+      TabIndex        =   17
+      Top             =   7644
+      Width           =   11748
+      _ExtentX        =   20722
+      _ExtentY        =   614
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
-         NumPanels       =   2
+         NumPanels       =   3
          BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
-            Object.Width           =   8819
-            MinWidth        =   8819
+            AutoSize        =   2
+            Object.Width           =   3535
+            MinWidth        =   3528
+            Object.ToolTipText     =   "Current File"
          EndProperty
          BeginProperty Panel2 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
-            Object.Width           =   11359
-            MinWidth        =   11359
+            AutoSize        =   2
+            Object.Width           =   3535
+            MinWidth        =   3528
+            Object.ToolTipText     =   "Stage of processing"
+         EndProperty
+         BeginProperty Panel3 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+            AutoSize        =   1
+            Object.Width           =   13117
+            MinWidth        =   3528
+            Object.ToolTipText     =   "Details"
          EndProperty
       EndProperty
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "MS Sans Serif"
-         Size            =   9.75
-         Charset         =   0
+         Size            =   9.6
+         Charset         =   222
          Weight          =   400
          Underline       =   0   'False
          Italic          =   0   'False
@@ -205,13 +307,13 @@ Begin VB.Form FrmMain
       EndProperty
    End
    Begin VB.TextBox Text1 
-      Height          =   6915
+      Height          =   6432
       Left            =   0
       MultiLine       =   -1  'True
-      OLEDropMode     =   1  'Manual
-      TabIndex        =   0
-      Text            =   "frmMain.frx":030A
-      Top             =   480
+      OLEDropMode     =   1  'Manuell
+      TabIndex        =   16
+      Text            =   "frmMain.frx":0397
+      Top             =   960
       Width           =   11175
    End
    Begin MSComDlg.CommonDialog CommonDialog1 
@@ -226,7 +328,7 @@ Begin VB.Form FrmMain
       Caption         =   "Data"
       Height          =   255
       Left            =   120
-      TabIndex        =   1
+      TabIndex        =   13
       Top             =   600
       Width           =   2295
    End
@@ -253,12 +355,14 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Const InterpretingProgress_FORMUPDATE_EVERY& = 300
-Const NAV_SCROLLDOWN_LINES& = 10
+#If DoDebug = 0 Then
+   Private Const InterpretingProgress_FORMUPDATE_EVERY& = 300
+#Else
+   Private Const InterpretingProgress_FORMUPDATE_EVERY& = 100
+#End If
 
-Const TXTOUT_OPCODE_COL& = 25
-Const TXTOUT_DISAM_COL& = 65
 
+Private Winhex As New clsSendToWinhex
 
 
 Const WM_CHAR = &H102
@@ -272,84 +376,26 @@ Private nav_TopStack As New Stack
 
 
 
-Private WithEvents File As FasFile
+Public WithEvents File As FasFile
 Attribute File.VB_VarHelpID = -1
 Private FilePath
 
 Private FileNr As Integer     'Shows Actual FileListIndex
-Private Filename$
-
+   
 Private frmWidth, frmheight As Long
 
 
-Private ProcID&                'ProcessID of HWORKS32.exe
-Private HWORKS_Path
-Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
-
-Private Declare Function SendInput Lib "user32.dll" (ByVal nInputs As Long, pInputs As INPUT_TYPE, ByVal cbSize As Long) As Long
-Private Declare Function MapVirtualKey Lib "user32" Alias "MapVirtualKeyA" (ByVal wCode As Long, ByVal wMapType As Long) As Long
-
- 
-Private Type KEYBDINPUT
-   wVk As Integer
-   wScan As Integer
-   dwFlags As Long
-   time As Long
-   dwExtraInfo As Long
-End Type
- 
- 
-Private Type INPUT_TYPE
-   dwType As Long
-   xi As KEYBDINPUT
-End Type
- 
- 
- 
-'KEYBDINPUT dwFlags-Konstanten
-Private Const KEYEVENTF_EXTENDEDKEY = &H1 'Der Scancode hat das Präfix &HE0
-Private Const KEYEVENTF_KEYUP = &H2 'Die angegebene Taste wird losgelassen
-Private Const KEYEVENTF_UNICODE = &H4 'Benutzt ein Unicode Buchstaben der nicht von einen der Tastaturcodes stammt welcher eine Tastatureingabe Simuliert
- 
-'INPUT_TYPE dwType-Konstanten
-Private Const INPUT_MOUSE = 0 'Mauseingabe
-Private Const INPUT_KEYBOARD = 1 'Tastatureingabe
-Private Const INPUT_HARDWARE = 2 'Hardwarenachricht
- 
  
 Public LispFileData As New Stack
  
- 
-Private Sub SendKey(char As Byte, Optional Keyup = True)
-   Dim IT As INPUT_TYPE
-   
-   With IT
-      'KeyDown
-       .dwType = INPUT_KEYBOARD
-       .xi.wVk = char
-       .xi.wScan = MapVirtualKey(char, 0)
-       .xi.dwFlags = 0
-       If SendInput(1&, IT, 28&) = 0 Then Debug.Print "Sendingkeys failed."
-      
-      'KeyUp
-       .xi.dwFlags = IIf(Keyup, KEYEVENTF_KEYUP, 0)
-       If SendInput(1&, IT, 28&) = 0 Then Debug.Print "Sendingkeys failed."
-    End With
-   
-    Sleep (10)
-   'Process Windows messages
-'    DoEvents
-      
-End Sub
+'GUI StatusBar Panels Names
+Enum Panel
+   PanelFilename = 1
+   PanelStatus = 2
+   PanelDetails = 3
+End Enum
 
-Private Sub SendKeys(vbKeys$)
-   Dim i As Integer
-   For i = 1 To Len(vbKeys)
-      SendKey (Asc(Mid(vbKeys, i)))
-   Next
-
-End Sub
-
+Public LV_Log_Ext As New Ext_ListView
 
 
 
@@ -361,15 +407,18 @@ Private Sub StartWork()
    Chk_Cancel.value = False
    Chk_Cancel.Visible = True
    
-   CloseHexWorkshop
+  ' Winhex.CloseHexWorkshop
    
    Dim item, i&: i = 1
  ' Note:This customized 'For each' is need because filelist may change inside loop
-   Do While i <= Filelist.count: item = Filelist(i)
+   Do While i <= Filelist.count
+          item = Filelist(i)
    
 '   For item = LBound(Filelist) - (FilePath <> Empty) To UBound(Filelist)
-           SetStatus CStr(item), 1
-            'SetStatus tmp, 1
+           Panel_File = item
+           Panel_File_ToolTip = Right(FilePath, 50)
+           
+            'Panel_Status =  tmp, 1
             Filename = FilePath & item 'Filelist(item)
             AddtoLog "Opening File " & Filename
          
@@ -384,14 +433,12 @@ Private Sub StartWork()
       If isLsp = False Then
       
        ' output file
-         Close #1
-         Open Filename & ".txt" For Output As 1
-         
+         FileLog_open
+
          
        ' Start Decompiling...
          On Error Resume Next
          File.Create Filename
-         
 
       End If
       
@@ -399,7 +446,9 @@ Private Sub StartWork()
                (Err = ERR_GUI_CANCEL) Then
                Dim tmp$
                tmp = "Batch processing canceled !"
-               SetStatus tmp: AddtoLog tmp
+               Panel_Status = tmp: AddtoLog tmp
+               
+               Chk_Cancel.Enabled = True
                Exit Do
             End If
 
@@ -416,9 +465,12 @@ StartWork_err:
    
    Case 0
    
+   Case ERR_GUI_CANCEL:
+      Chk_Cancel.Enabled = True
+   
    Case Is < 0 'Object orientated Error
       AddtoLog "ERROR: " & Err.Description
-      SetStatus Err.Description
+      Panel_Detail = "ERROR: " & Err.Description
       Resume Next
       
    Case Else:
@@ -428,6 +480,11 @@ StartWork_err:
    
  ' Clear Filelist
    Set Filelist = New Collection
+   
+Finally:
+   
+'   Set File = Nothing
+   FileLog_close
 
 End Sub
 
@@ -440,6 +497,14 @@ Private Sub Chk_Cancel_Click()
 End Sub
 
 
+Private Sub chk_Inspector_Click()
+   frmInspector.Visible = chk_Inspector.value = vbChecked
+End Sub
+
+Private Sub chk_Search_Click()
+   FrmSearch.Visible = chk_Search.value = vbChecked
+End Sub
+
 Private Sub ChkLog_Click()
    frmlog.Visible = ChkLog
 End Sub
@@ -449,12 +514,12 @@ End Sub
 Private Sub File_initBegin()
    ProgressBar1.Visible = False
    AddtoLog "Initialising ..."
-   SetStatus "Analysing Data..."
+   Panel_Status = "Analysing Data..."
 End Sub
 
 Private Sub File_DecryptingBegin(BytesToProgress As Long)
          
-         SetStatus "Decrypting Data..."
+         Panel_Status = "Decrypting Data..."
          AddtoLog "Decrypting ..."
          
          ProgressBar1.Min = 0
@@ -462,29 +527,37 @@ Private Sub File_DecryptingBegin(BytesToProgress As Long)
          ProgressBar1.Max = BytesToProgress
          ProgressBar1.Visible = True
          Text1 = Empty
-         ListView1.Visible = False
+         LV_Log.Visible = False
 '
-'         SetStatus ("No Valid FSL-File !")
+'         Panel_Status =  ("No Valid FSL-File !")
 End Sub
 Private Sub File_DecryptingProgress(BytesProgressed As Long, CharDecrypted As Long)
    If chk_verbose = vbChecked Then
       PostMessage Text1.Hwnd, WM_CHAR, CharDecrypted And (CharDecrypted > 32), 0
    End If
    
+   
+   Gui_CheckforCancel
+   
    If Chk_Cancel Then
       Dim tmp$
       tmp = "Decrypting canceled !"
-      SetStatus tmp: AddtoLog tmp
+      Panel_Status = tmp: AddtoLog tmp
       Err.Raise vbObjectError, "", tmp
    End If
    
+   ProgressBar_Update BytesProgressed
    
+End Sub
+
+Private Sub ProgressBar_Update(NewValue)
+
    Static count
-   count = count + 1
-   If count > InterpretingProgress_FORMUPDATE_EVERY& Then
+   Inc count
+   If count > (InterpretingProgress_FORMUPDATE_EVERY * 10) Then
       count = 0
       
-      If chk_Progressbar = vbChecked Then ProgressBar1 = BytesProgressed
+      If chk_Progressbar = vbChecked Then ProgressBar1 = NewValue
       
       DoEvents
       
@@ -494,160 +567,254 @@ End Sub
 
 
 Private Sub File_DecryptingDone()
-'         SetStatus IIf(IsDecryptingDone, "Done !", "Nothing done. File is already decrypted !")
-         SetStatus "Decrypting done !"
+'         Panel_Status =  IIf(IsDecryptingDone, "Done !", "Nothing done. File is already decrypted !")
+         Panel_Status = "Decrypting done !"
          AddtoLog ("Decrypting done !")
 End Sub
 
 Private Sub File_InitDone()
-   SetStatus "Init done !"
+   Panel_Status = "Init done !"
 End Sub
 
-Private Sub File_InterpretingBegin()
-   SetStatus ("Interpreting Data...")
+'
+Private Sub File_InterpretingBegin(BytesToProgress As Long)
+   Panel_Status = ("Interpreting Data...")
    AddtoLog ("Interpreting Data...")
-   ListView1.Visible = True
+   LV_Log.Visible = True
+   
+   ProgressBar1.Min = 0
+   ProgressBar1.value = 0
+   ProgressBar1.Max = Max(BytesToProgress, 1)
+   ProgressBar1.Visible = True
+   
 End Sub
 
 Private Sub File_InterpretingDone()
-         SetStatus "Disassembling done !"
+         Panel_Status = "Disassembling done !"
          AddtoLog ("Disassembling done !")
+         ProgressBar1.Visible = False
+         
+       ' Jump to DefunMain Function
+         Dim item As ListItem
+         Set item = LV_Log_Ext.OffsetKeyGet(0, OffToStr(File.ResourceStream_DefunMain))
+         LV_Log_Ext.EnsureVisible item
+         item.Selected = True
+         
+         
 End Sub
 
-Private Sub File_InterpretingProgress(FasCmdlineObj As FasCommando)
+Private Sub Listview_OutputLine(outp As Log_OutputLine, LineBreaksCount, FasCmdlineObj)
+   
+   With outp
+   
+      Dim li As MSComctlLib.ListItem
+      Set li = LV_Log.ListItems.add(, , LV_Log.ListItems.count)
+       
+    ' Bind FasCmdlineObj to Listitem
+      Set li.Tag = FasCmdlineObj
+           
+     On Error Resume Next
+      
+    'Add Key for jump to offset
+     LV_Log_Ext.OffsetKey(li, FasCmdlineObj.ModulId) = OffToStr(FasCmdlineObj.Position)
+     
+     On Error GoTo 0
+     Dim TextColor&
+     TextColor = GetColor_Cmd("&h" & outp.Command_Byte)
 
+   ' #1 Offset
+     Dim LSU As ListSubItem
+     Set LSU = LV_Log_Ext.ListSubItem(li, "pos")
+     LSU = .offset
+     LSU.ForeColor = IIf(File.m_MVar, _
+                        ColorConstants.vbMagenta, _
+                        ColorConstants.vbBlue _
+                        )
+   
+   ' #2 Command
+     Dim LVSI As ListSubItem
+     Set LVSI = LV_Log_Ext.ListSubItem(li, "cmd")
+     With LVSI
+         .Bold = True
+         .ForeColor = TextColor
+         .Text = outp.Command_Byte
+         .ToolTipText = outp.DisASM
+     End With
+     
+   ' #3 Parameters
+     With LV_Log_Ext.ListSubItem(li, "params")
+         .ForeColor = TextColor
+         .Text = outp.Params_Bytes
+     End With
+
+   ' #4 Parameters
+     With LV_Log_Ext.ListSubItem(li, "disasm")
+         .ForeColor = TextColor
+         .Text = outp.DisASM
+     End With
+     
+     LV_Log_Ext.ListSubItem(li, "sp") = .Stack
+     
+   ' #5 Parameters
+     LV_Log_Ext.ListSubItem(li, "descr") = .Description
+     LV_Log_Ext.ListSubItem(li, "decomp") = .DeCompiled
+
+    ' Add linebreaks
+    '  Dim LineBreaksCount
+    '  Output_GetLineBreaks .Description, LineBreaksCount
+
+      For i = 1 To LineBreaksCount
+         LV_Log.ListItems.add
+      Next
+      
+      Listview_ScrollToItem li
+
+   End With
+End Sub
+   
+
+
+
+
+Private Sub Gui_CheckforCancel()
    If Chk_Cancel Then
       Dim tmp$
       tmp = "Interpreting canceled !!!"
-      SetStatus tmp: AddtoLog tmp
       
-      ListView1.ListItems.Add , , tmp
+      Panel_Status = tmp: AddtoLog tmp
+      FileLog_Add tmp
       
-      Print #1, tmp
-
+      
+      LV_Log.ListItems.add , , tmp
+      
       FrmMain.LispFileData.push tmp
 
      Exit Sub
       
    End If
    
+End Sub
 
-' Fast and dirty code....
-   Dim OutputLine As New clsStrCat ', tmp$
-   Dim li As MSComctlLib.ListItem
+Private Sub File_InterpretingProgress(FasCmdlineObj As FasCommando)
    
- ' Format Offset
-   tmp = Format(FasCmdlineObj.Position, "00000")
+   Gui_CheckforCancel
    
-   Set li = ListView1.ListItems.Add(, , tmp)
-
- ' Bind FasCmdlineObj to Listitem
-   FasCmdlineObj.Tag = File.FasStringtable
-   Set li.Tag = FasCmdlineObj
+   ProgressBar_Update FasCmdlineObj.Position
    
-   On Error Resume Next
+   
+   Dim Out As Log_OutputLine
  
- ' add key for quickjump only when interpreting Functionstream (FasStringtable = 1)
-   If File.FasStringtable = 1 Then
-      li.key = "off:" & FasCmdlineObj.Position
-   End If
+ ' Format Offset
+'   tmp = Format(FasCmdlineObj.Position, "00000")
+   Out.offset = BlockAlign_r(OffToStr(FasCmdlineObj.Position), 6)
+
    
-   On Error GoTo 0
-   
- ' Offset
-   OutputLine.Concat tmp & " " & _
-            BlockAlign_l(Hex(FasCmdlineObj.Commando), 5)
-   
-   li.SubItems(1) = Hex(FasCmdlineObj.Commando)
-   
+ ' Command_Byte
+   Out.Command_Byte = Hex(FasCmdlineObj.Commando)
+
   
  ' Parameters
-   Dim item
-   For Each item In FasCmdlineObj.Parameters
-      Select Case TypeName(item)
-         
-         Case "Long", "Integer", "Byte"
-            OutputLine.Concat " " & Hex(item)
-            li.SubItems(2) = li.SubItems(2) & Hex(item) & " "
-         
-         Case "String"
-            OutputLine.Concat """" & item & """ "
-            li.SubItems(2) = li.SubItems(2) & """" & item & """ "
-      
-      End Select
+   Dim params, item
+   ReDim params(FasCmdlineObj.Parameters.count)
+   
+   Dim i
+   For i = 1 To FasCmdlineObj.Parameters.count
+      item = FasCmdlineObj.Parameters(i)
+'      Select Case TypeName(item)
+'
+'         Case "Long", "Integer", "Byte"
+           params(i) = item
+'
+'         Case "String"
+'           params(i) = """" & item & """"
+'
+'      End Select
    Next
    
-
-  'Disassembled
-  Dim disam$
-  disam = FasCmdlineObj.Disassembled
+   On Error Resume Next
+   Out.Params_Bytes = Join(params)
+   Err.Clear   ' Assume: .Params_Bytes are initialised with ""
+   
   
-  Dim lenBefore&
-  lenBefore = Len(disam)
-  disam = Replace(disam, vbCrLf, "")
+   Out.DisASM = FasCmdlineObj.Disassembled_Short
+   
+   Out.Description = FasCmdlineObj.Disassembled
   
-  Dim LineBreaksCount&
-  
-  LineBreaksCount = (lenBefore - Len(disam))
-  LineBreaksCount = LineBreaksCount \ Len(vbCrLf)
-  
-' Format OutputLine to fit in colum
-  OutputLine.value = IIf(OutputLine.Length <= TXTOUT_OPCODE_COL, _
-            BlockAlign_l(OutputLine.value, TXTOUT_OPCODE_COL), _
-            OutputLine.value) & " " & BlockAlign_l(disam, TXTOUT_DISAM_COL)
-    li.SubItems(3) = disam
-    
-  OutputLine.value = BlockAlign_l(OutputLine.value, TXTOUT_OPCODE_COL + TXTOUT_DISAM_COL)
    
  ' Stack
-   OutputLine.Concat File.FasStack.ESP
-   li.SubItems(4) = File.FasStack.ESP
+   Out.Stack = File.FasStack.esp
    
  ' Decompiled
-   OutputLine.Concat " " & FasCmdlineObj.Interpreted
-   li.SubItems(5) = FasCmdlineObj.Interpreted
+   Out.DeCompiled = FasCmdlineObj.Interpreted
+    
+   Output_DecompiledLine Out.DeCompiled
    
- ' Newline if ESP=0
-   Static lastStackitem
-   If File.FasStack.ESP < lastStackitem Then
-      LineBreaksCount = LineBreaksCount + 1
-   Else
+   
+   
+   Dim LineBreaksCount
+   Output_GetLineBreaks Out.Description, LineBreaksCount
+   
+   DoLog_OutputLine Out, LineBreaksCount
+
+
+  'Omit listview output to speed up decompiling and reduce memory footprint
+   If chk_Decryptonly = vbUnchecked Then
+      Listview_OutputLine Out, LineBreaksCount, FasCmdlineObj
    End If
-   lastStackitem = File.FasStack.ESP
- 
- ' Add linebreaks
-   For i = 1 To LineBreaksCount
-      ListView1.ListItems.Add
-      OutputLine.Concat vbCrLf
-   Next
    
-   
- ' Output
-'   If FasCmdlineObj.Commando = &H35 Then
-'      Debug.Print LineOutput
-'   End If
-   Print #1, OutputLine.value
-   
-   
+End Sub
+
+
+Sub Output_DecompiledLine(TextLine)
  ' Write Output to *.lsp
-   If FasCmdlineObj.Interpreted <> "" Then
+   If Trim(TextLine) <> "" Then
       
-      LispFileData.push FasCmdlineObj.Interpreted
+      LispFileData.push TextLine
 
       'Print #2, FasCmdlineObj.Interpreted
    End If
+
+End Sub
    
+   
+Private Sub Listview_ScrollToItem(li As MSComctlLib.ListItem)
+
    Static count
    count = count + 1
-   If count > InterpretingProgress_FORMUPDATE_EVERY& Then
+   If (count > InterpretingProgress_FORMUPDATE_EVERY) Then
       count = 0
-      li.EnsureVisible
+      If (chk_verbose.value = vbChecked) Then
+         LV_Log_Ext.EnsureVisible li
+      End If
+      
       DoEvents
    End If
+   
+End Sub
+
+Private Sub Form_Initialize()
+ ' Bind Listview extender to listview
+   LV_Log_Ext.Create LV_Log
 End Sub
 
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
    break = True
+End Sub
+Sub LV_Log_ColumnHeadersSize_restore()
+
+  'Restore Listview Columns
+   Dim CH As ColumnHeader, tmp$
+   For Each CH In LV_Log.ColumnHeaders
+      CH.Width = GetSetting(App.EXEName, "Listview", CH.Key, CH.Width)
+'      Debug.Print CH.Width
+   Next
+
+End Sub
+Sub LV_Log_ColumnHeadersSize_save()
+   Dim CH As MSComctlLib.ColumnHeader, tmp$
+   For Each CH In LV_Log.ColumnHeaders
+      SaveSetting App.EXEName, "Listview", CH.Key, CH.Width
+   Next
 End Sub
 
 Private Sub Form_Load()
@@ -660,12 +827,7 @@ Private Sub Form_Load()
    
    On Error GoTo Form_Load_err
    
-   Dim CH As ColumnHeader, tmp$
-   For Each CH In ListView1.ColumnHeaders
-      CH.Width = GetSetting(App.EXEName, "Listview", CH.Index, CH.Width)
-   Next
-   
-   HWORKS_Path = GetSetting(App.EXEName, "Hexworks", "Path", App.Path & "\Hex Workshop\HWORKS32.exe")
+   LV_Log_ColumnHeadersSize_restore
    
 'Test for Commandline Arguments
    Dim CommandLine As New CommandLine
@@ -678,11 +840,14 @@ Private Sub Form_Load()
       For Each item In CommandLine.getArgs()
          Dim dummy As New ClsFilename
          dummy = item
-         Filelist.Add dummy.Name & dummy.Ext
+         Filelist.add dummy.Name & dummy.Ext
       Next
       FilePath = dummy.Path
       Call StartWork
    End If
+   
+   
+   FormSettings_Load Me
    
    
    On Error GoTo Form_Load_err
@@ -690,24 +855,59 @@ Private Sub Form_Load()
 Form_Load_err:
    MsgBox Err.Number & ": " & Err.Description, vbCritical, "Runtime Error"
 End Sub
-Private Sub SetStatus(StatusText$, Optional panel = 2)
-   StatusBar1.Panels(panel).Text = "File " & FileNr & " " & StatusText
+
+Property Let Panel_File_ToolTip(Text$)
+   SetBarToolTipText Text, _
+               Panel.PanelFilename
+End Property
+
+Property Let Panel_File(Text$)
+   SetBarText Join(Array("File", FileNr, Text), " "), _
+               Panel.PanelFilename
+End Property
+
+Property Let Panel_Status(Text$)
+   SetBarText Text, Panel.PanelStatus
+End Property
+
+Property Let Panel_Detail(Text$)
+   SetBarText Text, Panel.PanelDetails
+End Property
+
+
+Private Sub SetBarText(Text$, Optional Panelidx = Panel.PanelStatus)
+   StatusBar1.Panels(Panelidx).Text = Text
 End Sub
 
-Public Sub AddtoLog(Textline$)
-   frmlog.listLog.AddItem Textline
+
+Private Sub SetBarToolTipText(Text$, Optional Panelidx = Panel.PanelStatus)
+ 'Attention Tooltip is somehow cropped after 50 chars
+   StatusBar1.Panels(Panelidx).ToolTipText = Text
 End Sub
+
+Public Sub AddtoLog(TextLine$)
+
+   FrmMain.Panel_Detail = TextLine
+   
+   Dim item
+   For Each item In Split(TextLine, vbCrLf)
+      frmlog.listLog.AddItem item
+   Next
+   
+End Sub
+
 
 
 Private Sub Form_Resize()
    On Error Resume Next
-   Dim item As panel
+   Dim item ' As Panel
    Dim frmScaleWidth, frmScaleheight As Single
        frmScaleWidth = Me.Width / frmWidth
        frmScaleheight = Me.Height / frmheight
-   For Each item In StatusBar1.Panels
-      item.Width = frmScaleWidth * item.Width
-   Next
+       
+'   For Each item In StatusBar1.Panels
+'      item.Width = frmScaleWidth * item.Width
+'   Next
    frmWidth = Me.Width
    frmheight = Me.Height
    
@@ -715,82 +915,124 @@ Private Sub Form_Resize()
    Text1.Height = Me.Height - Text1.Top - StatusBar1.Height - 800
    
    
-   ListView1.Width = Text1.Width
-   ListView1.Height = Text1.Height
+   LV_Log.Width = Text1.Width
+   LV_Log.Height = Text1.Height
   
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
    On Error Resume Next
   
-   If HWORKS_Path <> "" Then SaveSetting "Fas-Disasm", "Hexworks", "Path", HWORKS_Path
-   
-   CloseHexWorkshop
   
    Dim Form
    For Each Form In Forms
       Unload Form
    Next
+   
+   FormSettings_Save Me, "LV_Log Text1"
+   
    'End 'unload all otherforms
 End Sub
 
 
-Private Sub CloseHexWorkshop()
-   On Error Resume Next
-  
-  'close open Hexworks
-   Shell Environ("systemroot") & "\System32\Taskkill.exe /pid " & ProcID, vbHide
 
-End Sub
-
-'Private Sub ListView1_jump(item As MSComctlLib.ListItem)
-'Private Sub ListView1_jump(index&)
+'Private Sub LV_Log_jump(item As MSComctlLib.ListItem)
+'Private Sub LV_Log_jump(index&)
 
 'End Sub
 
 Private Sub cmd_forward_Click()
+   On Error Resume Next
    Nav_forward
 End Sub
 
 Private Sub cmd_back_Click()
+   On Error Resume Next
    Nav_back
 End Sub
 
-Private Sub ListView1_DblClick()
+Private Sub Inspector_update()
+
+  If frmInspector.Visible = False Then Exit Sub
+  
+  On Error Resume Next
+  frmInspector.updateData LV_Log.SelectedItem.Tag
+  If Err Then frmInspector.clean
+  
+End Sub
+
+
+Private Sub frmInspector_clean()
+   With frmInspector
+      .ModulId = ""
+      .Position = ""
+      .Commando = ""
+      .Parameters = ""
+      .Disassembled = ""
+      .Interpreted = ""
+      .Stack_Pointer = ""
+      .Stack = ""
+      
+   End With
+
+End Sub
+
+
+Private Sub frmInspector_updateData()
+
+   Dim item As FasCommando
+   Set item = LV_Log.SelectedItem.Tag
+   
+   Dim Dest As frmInspector
+   Set Dest = frmInspector
+   
+   With frmInspector
+      .ModulId = item.ModulId
+      .Position = item.Position
+      .Commando = item.Commando
+      Dim tmp As clsStrCat
+      .Parameters = CStr(Join(CollectionToArray(item.Parameters)))
+      .Disassembled = item.Disassembled
+      .Interpreted = item.Interpreted
+      .Stack_Pointer = item.Stack_Pointer_After
+      .Stack = item.Stack_After
+      
+   End With
+   
+
+End Sub
+
+
+
+Private Sub LV_Log_DblClick()
    Nav_to
 End Sub
 
 Private Sub Nav_forward()
    Dim item As MSComctlLib.ListItem
    
-   If nav_PositionHistory.ESP < nav_TopStack Then
+   If nav_PositionHistory.esp < nav_TopStack Then
       
-      nav_PositionHistory.ESP = nav_PositionHistory.ESP + 1
+      nav_PositionHistory.esp = nav_PositionHistory.esp + 1
       
-      cmd_forward.Enabled = nav_PositionHistory.ESP < nav_TopStack
+      cmd_forward.Enabled = nav_PositionHistory.esp < nav_TopStack
       cmd_back.Enabled = True
       
-      ListView1.SelectedItem.Selected = False
-      ListView1.SelectedItem.Bold = True
+      LV_Log.SelectedItem.Selected = False
+      LV_Log.SelectedItem.Bold = True
       
       'note that the stackpointer + 2 (<= +1 +1)
-      With nav_PositionHistory.Storage(nav_PositionHistory.ESP + 1)
-         'Jump to target
-          .Bold = False
+      Set item = nav_PositionHistory.Storage(nav_PositionHistory.esp + 1)
+      With item
+       ' Jump to target
+         .Bold = False
           
-          ' Jump to target
-          ' 1.to the end
-            ListView1.ListItems(ListView1.ListItems.count).EnsureVisible
-          ' 2.to the item
-            .EnsureVisible
-          ' 3.Scroll down some lines
-            ListView1.ListItems(.Index - NAV_SCROLLDOWN_LINES).EnsureVisible
+         .Selected = True
+         LV_Log_Ext.EnsureVisible item
 
-          
-          .Selected = True
       End With
-      
-      ListView1.SetFocus
+            
+      LV_Log.SetFocus
       
    End If
 End Sub
@@ -798,97 +1040,120 @@ End Sub
 Private Sub Nav_back()
    Dim item As MSComctlLib.ListItem
    
-   If nav_PositionHistory.ESP Then
+   If nav_PositionHistory.esp Then
       
-      nav_PositionHistory.pop
+      nav_PositionHistory.popIntoVoid
       
-      cmd_back.Enabled = nav_PositionHistory.ESP
+      cmd_back.Enabled = nav_PositionHistory.esp
       cmd_forward.Enabled = True
       
       
-      ListView1.SelectedItem.Selected = False
+      LV_Log.SelectedItem.Selected = False
       
-      With nav_PositionHistory.Storage(nav_PositionHistory.ESP + 1)
-         'Jump to target
-          .Bold = False
+      Set item = nav_PositionHistory.Storage(nav_PositionHistory.esp + 1)
+      With item
+       ' Jump to target
+         .Bold = False
           
-          ' Jump to target
-          ' 1.to the end
-            ListView1.ListItems(ListView1.ListItems.count).EnsureVisible
-          ' 2.to the item
-            .EnsureVisible
-          ' 3.Scroll down some lines
-            ListView1.ListItems(.Index - NAV_SCROLLDOWN_LINES).EnsureVisible
+         .Selected = True
+         LV_Log_Ext.EnsureVisible item
 
-          
-          .Selected = True
       End With
       
-      ListView1.SetFocus
+      LV_Log.SetFocus
       
    End If
 End Sub
 
 Private Sub Nav_to()
+   On Error GoTo ERR_Nav_to
+
 
    Dim item As MSComctlLib.ListItem
-   
    'Scan selected line of dasm for offset
    ' well numbers will only be found if there is a space before like
-   ' "goto 4232" or " at 0730"
-   ' but not "0x222" or "else jump121"
+   ' "goto $12AF" or " at $0730"
+   ' but not "0x222", " 131" or "else jump121"
    ' split line at spaces
+   
    Dim RawTextPart
-   For Each RawTextPart In Split(ListView1.SelectedItem.SubItems(3))
+   Set item = LV_Log.SelectedItem
+   
+   Dim FasCommando As FasCommando
+   Set FasCommando = item.Tag
+   
+'
+   Panel_Status = "Try to quickjump from " & OffToStr(FasCommando.Position) & "_" & FasCommando.ModulId
+'   If FasCommando.ModulId <> 1 Then
+'      Panel_Detail = "Quickjump only works in the fas-function stream."
+'      'Err.Raise vbObjectError, "FrmMain::Nav_to", "Quickjump only works in the fas-function stream."
+'      Exit Sub
+'   Else
+      Panel_Detail = " "
+'   End If
+   
+   Dim Rawtext
+   Rawtext = LV_Log_Ext.ListSubItem(item, "descr")
+   On Error Resume Next
+   For Each RawTextPart In Split(Rawtext)
+      
+      
     ' try to extract number
-      If Val(RawTextPart) <> 0 Then
-        'Check for valid offset (can listitem with .key be found)
+      If OffToVal(RawTextPart) <> 0 Then
+      
+       ' Check for valid offset (can listitem with .key be found)
          On Error Resume Next
-         Set item = ListView1.ListItems("off:" & Val(RawTextPart))
+         Dim moduleID
+         moduleID = IIf(Rawtext Like "*Modul:0*", 1, 0)
+         Set item = LV_Log_Ext.OffsetKeyGet(moduleID, RawTextPart)
          If Err = 0 Then
             
           ' store current position on Stack
-            nav_PositionHistory.push ListView1.SelectedItem
-            nav_TopStack = nav_PositionHistory.ESP
+            nav_PositionHistory.push LV_Log.SelectedItem
+            nav_TopStack = nav_PositionHistory.esp
             
-          ' store new temporally position on Stack alswell
+          ' store new temporally position on Stack aswell
             nav_PositionHistory.push item
-          ' that's to make it temporally
-            nav_PositionHistory.pop
+            
+ '         ' that's to make it temporarely
+            nav_PositionHistory.popIntoVoid
             
            
            'mark current LI and save it (-its  position)
-            ListView1.SelectedItem.Bold = True
-'            ListView1.SelectedItem.Selected = False
+            LV_Log.SelectedItem.Bold = True
+'            LV_Log.SelectedItem.Selected = False
             cmd_back.Enabled = True
             cmd_forward.Enabled = False
 
            
-          ' Jump to target
-          ' 1.to the end
-            ListView1.ListItems(ListView1.ListItems.count).EnsureVisible
-          ' 2.to the item
-            item.EnsureVisible
-          ' 3.Scroll down some lines
-            ListView1.ListItems(item.Index - NAV_SCROLLDOWN_LINES).EnsureVisible
-
             item.Selected = True
+            LV_Log_Ext.EnsureVisible item
             
-            ListView1.SetFocus
+            LV_Log.SetFocus
             
          End If
          Err.Clear
       End If
    Next
+   
+Exit Sub
+ERR_Nav_to:
+   If Err Then Panel_Detail = Err.Description
+   
 End Sub
 
-Private Sub ListView1_ItemClick(ByVal item As MSComctlLib.ListItem)
+Private Sub LV_Log_ItemClick(ByVal item As MSComctlLib.ListItem)
    On Error Resume Next
+  
+   Inspector_update
   
  ' Filter out empty lines AND Skip if "use HexWorkShop" is unchecked
    If (item = "") Or (Chk_HexWork = vbUnchecked) Then Exit Sub
    'Debug.Assert
-   Set ListView1.SelectedItem = item
+   
+   
+   'Bug: Item with index over 0x1f000 gets 0
+   'Set LV_Log.SelectedItem = item
    
    'Reset timer
    Timer_Winhex.Enabled = False
@@ -897,87 +1162,36 @@ Private Sub ListView1_ItemClick(ByVal item As MSComctlLib.ListItem)
 
 End Sub
 
-Private Sub Timer_Winhex_Timer()
+
+Private Sub Slider_Zoom_Scroll()
    On Error Resume Next
-   Timer_Winhex.Enabled = False
-   DoEvents
-   
-   Dim item As MSComctlLib.ListItem
-   Set item = ListView1.SelectedItem
-
- ' test if Hexworks is still running
-   Err.Clear
-   AppActivate "Hex Workshop"
-   If Err <> 0 Then
-    
-    ' Start Hexworks
-      Do
-         Err.Clear
-         ProcID = Shell(HWORKS_Path & " """ & Filename & """", vbNormalFocus)
-         If Err And (Chk_HexWork <> vbUnchecked) Then
-            Dim tmpPath$
-            tmpPath = InputBox("Please enter path+Filename to HWORKS32.exe", Err.Description, HWORKS_Path)
-            If tmpPath = "" Then
-               Chk_HexWork.value = vbUnchecked
-               Exit Sub
-            Else
-               HWORKS_Path = tmpPath
-            End If
-         Else: Exit Do
-         End If
-      Loop While True
-    
-    ' Wait till Hexworks is loaded
-'      Sleep (500)
-   End If
-
- ' switch to Hexworks
-   AppActivate "Hex Workshop"
- 
-   
-   Dim objFasCmd As FasCommando
-   Set objFasCmd = ListView1.SelectedItem.Tag
- 
- ' calculate absolute offset in fasfile
-   Dim Offset
-   Offset = item + IIf(objFasCmd.Tag = 0, File.Offset_DataStart, File.Offset_CodeStart)
- 
- ' send goto offset X to Hexworks
-   VBA.SendKeys "{ESC}{F5}%b%d" & Offset & "~", 1000
-   
- ' Calculate length
-   Dim nextitem
-   nextitem = ListView1.ListItems(item.Index + 1)
-   
-    ' Test if next item is empty
-      Dim Length
-      If nextitem = "" Then
-         Length = ListView1.ListItems(item.Index + 2) - item
-      Else
-         Length = nextitem - item
-      End If
-   
-   ' Errorcorrection
-      If Length <= 0 Then Length = 1
-   
-   
-  ' Keyinput: Shift Down - for an unknown reason Hex Workshop 4.10 "+{RIGHT}" don't work
-    SendKey vbKeyShift, False
-  
-  ' Keyinput: SHIFT+RIGHT...
-  ' For an unknown reason 'SendKey vbKeyShift, False' don't work Hex Workshop 2.54 but
-  ' "+{RIGHT}" does
-    VBA.SendKeys "+{RIGHT " & Length & "}", 1
-  
-  ' Keyinput: Shift UP
-    SendKey vbKeyShift
-
- ' Activated Fas-decomp
-   Me.SetFocus
+   LV_Log.Font.size = Slider_Zoom.value / 10
    
 End Sub
 
-Private Sub ListView1_KeyPress(KeyAscii As Integer)
+Private Sub Timer_Winhex_Timer()
+   Timer_Winhex.Enabled = False
+   DoEvents
+
+   On Error Resume Next
+   Winhex.Winhex_JumpToSelectedItem _
+      LV_Log, Me, _
+      File.Offset_DataStart, _
+      File.Offset_CodeStart
+      
+   If Err Then
+      Panel_Status = "Err_SendHexWorks: " & Err.Description
+      Chk_HexWork.value = vbUnchecked
+
+   Else
+      Panel_Status = ""
+
+   End If
+      
+   
+End Sub
+
+Private Sub LV_Log_KeyPress(KeyAscii As Integer)
    Select Case KeyAscii
       
       Case vbKeyBack, 45 '<-vbKeySubtract
@@ -996,40 +1210,45 @@ End Sub
 
 Private Sub mi_ColSave_Click()
 
-Dim CH As MSComctlLib.ColumnHeader, tmp$
-   For Each CH In ListView1.ColumnHeaders
-      SaveSetting App.EXEName, "Listview", CH.Index, CH.Width
-   Next
+   LV_Log_ColumnHeadersSize_save
+
 End Sub
 
 Private Sub mi_reload_Click()
       Dim dummy As New ClsFilename
       dummy = Filename
-      Filelist.Add dummy.Name & dummy.Ext
+      Filelist.add dummy.Name & dummy.Ext
       
       FilePath = dummy.Path
 
       StartWork
 End Sub
 
-Private Sub mi_Search_Click()
-   FrmSearch.Show
+
+
+Private Sub Text1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+   DragEvent data
 End Sub
 
-Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-   DragEvent Data
+Private Sub List1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+   DragEvent data
 End Sub
 
-Private Sub List1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-   DragEvent Data
+Private Sub Form_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+   DragEvent data
 End Sub
 
-Private Sub Form_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-   DragEvent Data
-End Sub
+Private Sub DragEvent(data As DataObject)
+On Error GoTo DragEvent_err
+'   If Data.GetFormat(vbCFText) Then
+'      Stop
+'   End If
+'   If Data.GetFormat(vbCFMetafile) Then
+'      Stop
+'   End If
+      
 
-Private Sub DragEvent(Data As DataObject)
-   If Data.GetFormat(vbCFFiles) Then
+'   If Data.GetFormat(vbCFFiles) Then
       
 '      ReDim Filelist(data.Files.count - 1)
  '     Dim i As Integer
@@ -1037,16 +1256,59 @@ Private Sub DragEvent(Data As DataObject)
    '      Filelist(i) = data.Files.item(i + 1)
     '  Next
       
-      Dim item
-      For Each item In Data.Files
-         Dim dummy As New ClsFilename
+      Dim FileCount&
+      Dim item, dummy As New ClsFilename
+      For Each item In data.Files
          dummy = item
-         Filelist.Add dummy.Name & dummy.Ext
+         
+         Panel_Status = "File dragged in from: " & dummy.Path
+         
+         ' GetAttr may raise Error if file was not found
+         If GetAttr(item) <> vbDirectory Then
+         
+            FileNr = FileCount + 1
+            
+          ' on first file...
+            If FileCount = 0 Then
+            
+             ' ... reset Filelist
+               Set Filelist = New Collection
+               
+               
+            End If
+            Inc FileCount
+            
+            Panel_File = dummy.Name
+
+            
+            Filelist.add dummy.Name & dummy.Ext
+
+ 
+         Else
+            MsgBox _
+               "Getting all the contained files is not supported." & vbCrLf & _
+               "" & vbCrLf & _
+               "Please go into the folder - press ctrl+A to select the all files and " & vbCrLf & _
+               "then drag them all in here again.", _
+               vbExclamation, _
+               "Whoops you dragged in a whole folder." _
+
+            Exit For
+         End If
       Next
+      
       FilePath = dummy.Path
 
-      Timer_DropStart.Enabled = True
-   End If
+      
+      If Filelist.count Then _
+         Timer_DropStart.Enabled = True
+'   End If
+   
+DragEvent_err:
+
+   If Err Then _
+      Panel_Detail = "Error: " & Err.Description
+      Panel_File = dummy.Name
 End Sub
 
 
@@ -1071,7 +1333,7 @@ Private Sub mi_open_Click()
          Dim item
          Set Filelist = Nothing
          For Each item In Split(.Filename, vbNullChar)
-            Filelist.Add item
+            Filelist.add item
          Next
         
        ' extract path
@@ -1080,7 +1342,7 @@ Private Sub mi_open_Click()
        
        ' If more than 1 file remove first - path only entry
          If Filelist.count <= 1 Then
-            Filelist.Add dummy.Name & dummy.Ext
+            Filelist.add dummy.Name & dummy.Ext
             FilePath = dummy.Path
          Else
             FilePath = Filelist(1) & "\"
@@ -1098,7 +1360,18 @@ mi_open_err:
 
    mi_open.Enabled = True
    
-If Err <> 32755 Then MsgBox Err.Number & ": " & Err.Description, vbCritical, "Runtime Error"
+If Err = 20477 Then
+   On Error GoTo mi_open_err
+   
+   CommonDialog1.Filename = _
+      InputBox("Please correct the FileName: ", _
+                "Whoops FileDialog says 'Invalid filename'", _
+                 CommonDialog1.Filename _
+                )
+   Resume
+End If
+If Err <> 32755 Then _
+   MsgBox Err.Number & ": " & Err.Description, vbCritical, "Runtime Error"
 End Sub
 
 Private Sub Timer_DropStart_Timer()

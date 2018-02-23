@@ -1,19 +1,19 @@
 VERSION 5.00
 Begin VB.Form frmFunction 
-   BorderStyle     =   5  'Sizable ToolWindow
+   BorderStyle     =   5  '?nderbares Werkzeugfenster
    Caption         =   "Function Window"
-   ClientHeight    =   3510
-   ClientLeft      =   11805
-   ClientTop       =   390
-   ClientWidth     =   3180
+   ClientHeight    =   3528
+   ClientLeft      =   15528
+   ClientTop       =   5052
+   ClientWidth     =   996
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   3510
-   ScaleWidth      =   3180
+   ScaleHeight     =   3528
+   ScaleWidth      =   996
    ShowInTaskbar   =   0   'False
    Begin VB.ListBox Lb_Functions 
-      Height          =   3180
+      Height          =   3120
       Left            =   0
       TabIndex        =   0
       ToolTipText     =   "Double click to jump"
@@ -27,9 +27,10 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-
-Private Sub Form_Load()
-   MostTop Me.Hwnd
+Dim myFormExtenter As FormExt_MostTop
+Private Sub Form_Initialize()
+   Set myFormExtenter = New FormExt_MostTop
+   myFormExtenter.Create Me
 End Sub
 
 
@@ -48,27 +49,30 @@ Private Sub Lb_Functions_Click()
    On Error Resume Next
    
    Dim tmp
-   tmp = "off:" & Split(Lb_Functions, "  ")(1)
+   tmp = Split(Lb_Functions, "  ")(1)
    
-   With FrmMain.ListView1.ListItems
-   
-    'Find myItem
-      Dim myItem As ListItem
-      Set myItem = .item(tmp)
-      
-    ' Ensure that List Item is always shown on top
-      .item(.count).EnsureVisible
-      
-    ' Select it
-      myItem.Selected = True
-      
-    ' scroll 6 item up in list (if it's item 1..6)
-      .item(IIf(myItem.Index <= 6, _
-               myItem.Index, _
-               myItem.Index - 6) _
-            ).EnsureVisible
-    
-   End With
+   FrmMain.LV_Log_Ext.EnsureVisible _
+   FrmMain.LV_Log_Ext.OffsetKeyGet(1, tmp)
+
+'   With FrmMain.LV_Log.ListItems
+'
+'    'Find myItem
+'      Dim myItem As ListItem
+'      Set myItem = .item(tmp)
+'
+'    ' Ensure that List Item is always shown on top
+'      .item(.count).EnsureVisible
+'
+'    ' Select it
+'      myItem.Selected = True
+'
+'    ' scroll 6 item up in list (if it's item 1..6)
+'      .item(IIf(myItem.Index <= 6, _
+'               myItem.Index, _
+'               myItem.Index - 6) _
+'            ).EnsureVisible
+'
+'   End With
 
 End Sub
 

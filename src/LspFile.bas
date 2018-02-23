@@ -8,7 +8,7 @@ Option Explicit
 Private Const PROTECTED_LISP_FILE_SIGNATURE$ = "AutoCAD PROTECTED LISP file" ' & vbCrLf ' & Chr(&H1E)
 
 
-Public Function LspFile_Decrypt(Filename$) As Boolean
+Public Function LspFile_Decrypt(FileName$) As Boolean
 
    Dim LISP_FILE As New FileStream
    With LISP_FILE
@@ -16,9 +16,9 @@ Public Function LspFile_Decrypt(Filename$) As Boolean
 
        
        Dim LSP_InFileName As New ClsFilename
-       LSP_InFileName = Filename
+       LSP_InFileName = FileName
        
-      .Create LSP_InFileName.Filename
+      .Create LSP_InFileName.FileName
       
        
        If isPROTECTED_LISP_FILE(LISP_FILE) Then
@@ -26,8 +26,8 @@ Public Function LspFile_Decrypt(Filename$) As Boolean
    
          Dim OutFile As New clsStrCat
          
-         Dim key As Byte
-         key = .int8
+         Dim Key As Byte
+         Key = .int8
    
          Do
             Dim InData As Byte
@@ -43,7 +43,7 @@ Public Function LspFile_Decrypt(Filename$) As Boolean
                Else
                
                Dim Data_Out As Byte
-               Data_Out = InData Xor key
+               Data_Out = InData Xor Key
                
                If (Data_Out = Byte_1A_EOF) Or _
                   (Data_Out = Byte_0D_CR) Then
@@ -66,7 +66,7 @@ Public Function LspFile_Decrypt(Filename$) As Boolean
                tmp = InData
                tmp = tmp + tmp '= tmp << 1
                If tmp > 255 Then tmp = tmp - 255 '(tmp and 255)+1
-               key = tmp
+               Key = tmp
                
                
             End If
@@ -75,13 +75,13 @@ Public Function LspFile_Decrypt(Filename$) As Boolean
          
    
          Dim LSP_OutFileName As New ClsFilename
-         LSP_OutFileName = LSP_InFileName.Filename
+         LSP_OutFileName = LSP_InFileName.FileName
          
          LSP_OutFileName.Name = LSP_OutFileName.Name & "_Dec"
         
-         FileSave LSP_OutFileName.Filename, OutFile.value
+         FileSave LSP_OutFileName.FileName, OutFile.value
          
-         FrmMain.AddtoLog "Lisp File save to: " & LSP_OutFileName.Filename
+         FrmMain.AddtoLog "Lisp File save to: " & LSP_OutFileName.FileName
        
       
          LspFile_Decrypt = True

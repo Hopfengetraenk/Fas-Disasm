@@ -1,24 +1,24 @@
 VERSION 5.00
 Begin VB.Form frmlog 
-   BorderStyle     =   5  'Änderbares Werkzeugfenster
+   BorderStyle     =   5  '?nderbares Werkzeugfenster
    Caption         =   "Log Window"
-   ClientHeight    =   3195
-   ClientLeft      =   60
-   ClientTop       =   10455
-   ClientWidth     =   4680
+   ClientHeight    =   684
+   ClientLeft      =   132
+   ClientTop       =   9132
+   ClientWidth     =   11808
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   3195
-   ScaleWidth      =   4680
+   ScaleHeight     =   684
+   ScaleWidth      =   11808
    ShowInTaskbar   =   0   'False
    Begin VB.ListBox listLog 
-      Height          =   3180
+      Height          =   624
       Left            =   0
       TabIndex        =   0
       ToolTipText     =   "Righclick  to clear."
       Top             =   0
-      Width           =   4695
+      Width           =   11892
    End
 End
 Attribute VB_Name = "frmlog"
@@ -27,9 +27,14 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Dim myFormExtenter As FormExt_MostTop
+Private Sub Form_Initialize()
+   Set myFormExtenter = New FormExt_MostTop
+   myFormExtenter.Create Me
+End Sub
 
-Public Sub clear()
-   listLog.clear
+Public Sub Clear()
+   listLog.Clear
 End Sub
 
 Private Sub Form_Resize()
@@ -38,9 +43,9 @@ Private Sub Form_Resize()
 End Sub
 
 
-Private Sub listLog_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub listLog_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
       If Button = vbRightButton Then
-      Me.clear
+      Me.Clear
    ElseIf Button = vbRightButton Then
    Else
    End If

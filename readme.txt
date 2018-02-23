@@ -1,8 +1,8 @@
-Fas-Disassembler for Visuallisp 0.8
-===================================
+Fas-Disassembler for Visuallisp 0.11
+====================================
 
 Autolisp is a programming language for AutoCAD.
-Lisp sourcecode files have the extension LSP and 
+Lisp source code files have the extension LSP and 
 the compiled Lisp-scripts FAS.
 This program will decrypt the resource part of fas 
 and fsl files (write it to disk) and disassemble the it.
@@ -13,8 +13,8 @@ an Hexeditor.
 
 
 Keys:
-Enter,Space, Doubleclick on a line to 
-	jump to a offset that is in the Disam
+Enter,Space, Double click on a line to 
+	jump to a offset that is in the Disasm
 	Like "Goto 0213"
 
 Backspace, Num'-' to 
@@ -61,9 +61,25 @@ At the moment there is no documentation file for fas-commands.
 To get more information about the command please look at the function 
 'InterpretStream()' in FasFile.cls and learn from the fas-disassembling.
 
+
+Some specifications about the Fas-format are here:
+http://files.planet-dl.org/cw2k/Fas%20AutoLisp-Decompiler/fas-format.htm
+
 ---------------------------------------------
 Version history:
-0.9
+0.11  Feb 2018
+  * improved decompilation 
+    +  support for local vars
+    +  started to manage/take care for types
+    +  branches cons, repeat
+  * added inspector tool
+  * colored output ( Each command has it's own color )
+
+0.10
+  * Uploaded to Git-hub
+  * Some bugfix ( on reload content of *_.lsp was appended)
+
+0.9  Dez 2013
   * Support for 'AutoCAD PROTECTED LISP file' *.lsp
   
 0.8
@@ -71,19 +87,19 @@ Version history:
   * forward backward buttons for navigation add
   
 0.7
-  * opcodesnames for fsl-disassembling improved
-  * add loop recognission
+  * opcodes names for fsl-disassembling improved
+  * add loop recognition
   * decompilation column added
   
 0.6
-  * added Quickjump function for Hexworkshop
-  * added Case insensitiv search Checkbox 
+  * added Quick jump function for Hexworkshop
+  * added Case in sensitiv search Checkbox 
   
 0.5
   * FasCommand disassembling improved
   * small bug's fixed
   
-0.4
+0.4  Nov 2005 
   * First public Version
 
 0.3..0.1

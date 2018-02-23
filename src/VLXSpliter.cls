@@ -11,6 +11,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
+Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
 
 Private Const VLX_FILE_SIGNATURE$ = "VRTLIB-1"
@@ -39,7 +41,7 @@ Private Sub ReportExtractedFasFile(Filename$)
 '   newIndex = UBound(Filelist) + 1
 '   ReDim Preserve Filelist(newIndex)
  '  Filelist(newIndex) = Filename
-   Filelist.Add Filename
+   Filelist.add Filename
    
 End Sub
 
@@ -123,7 +125,7 @@ Public Function VLX_Split(strInputFilename As String) As Boolean
             If Err.Number = 0 Then
                OutputFileName.Name = OutputFileName.Name & "_" & FileCount
             Else
-               FilesList.Add "", FilesList_search_key
+               FilesList.add "", FilesList_search_key
             End If
             
          On Error GoTo 0

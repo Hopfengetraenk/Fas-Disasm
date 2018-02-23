@@ -1,28 +1,25 @@
 (defun main 
-FasStringtables 0
-FasStringtables 1
+;; FasStringtables 0
+;; FasStringtables 1
 (defun main 
 nil
-(PRINC "Start")
-; (setq TESTEXT <Func> TESTEXT)
-TESTEXT
-; (setq LOCAL <Func> LOCAL)
-LOCAL
-; (setq TEST <Func> TEST)
-TEST
-(TEST 1 2)
-(PRINC "End")
-(defun TESTEXT (BLAH1  BLAH2)
-(PRINC "Start")
-(defun LOCAL(/ BLAH1 BLAH2)
-(PRINC "Start")
-(defun TEST (BLAH1  BLAH2 / ANG1 ANG2)
-; (setq ANG1 "Monday")
-; (setq ANG2 "Tuesday")
-(PRINC (STRCAT "\nANG1 has the value " ANG1))
-(PRINC (STRCAT "\nANG2 has the value " ANG2))
-(PRINC )
-(defun DDSTEEL(/ P1 P2 P3)
-(PRINC "func Inside func")
-; (setq DDSTEEL <Func> DDSTEEL)
-DDSTEEL
+(princ "Start")
+testext
+local
+test
+(test 1 2)
+(princ "End") )
+(defun testext (blah1  blah2)
+(princ "Start") )
+(defun local(/ blah1 blah2)
+(defun local(/ blah1 blah2)
+(princ "Start") )
+(defun test (blah1  blah2 / ang1 ang2)
+(defun test (blah1  blah2 / ang1 ang2)
+(princ (strcat "\nANG1 has the value " ang1))
+(princ (strcat "\nANG2 has the value " ang2))
+(princ )
+(defun ddsteel(/ p1 p2 p3)
+(defun ddsteel(/ p1 p2 p3)
+(princ "func Inside func") )
+ddsteel )

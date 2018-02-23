@@ -1,4 +1,4 @@
-#Fas-Disassembler for Visuallisp 0.8
+# Fas-Disassembler for Visuallisp 0.8
 ===================================
 
 ![ScreenShot](http://imagizer.imageshack.com/img922/1965/nw7j4n.png)
@@ -14,7 +14,7 @@ can change some things with help of the offset and
 an Hexeditor.
 
 
-###Keys:
+### Keys:
 Enter, Space, double click on a line to 
 	jump to a offset that is in the Disasm
 	Like "Goto 0213"
@@ -26,14 +26,14 @@ Backspace, Num'-' to
 	go forward
 
 
-###Getting FSL-Files
+### Getting FSL-Files
 All internal lisp programs of Visuallisp are store in the 
 resource section of vllib.dll (or vl.arx in Autocad LT).
 Use "Resource Hacker" or "Exescope" to dump 
 these resources to disk and rename them to  *.fsl.
 
 
-###FAS to LSP-Files
+### FAS to LSP-Files
 The data from the decompiler colum it written to
 some *_.lsp. However decompiler is far from being
 perfect. I really advice you to always 
@@ -41,7 +41,7 @@ also open the *.txt which contains all
 information.
 
 
-###Editing FAS-Files
+### Editing FAS-Files
 For this purpose enable [HexWorkShop] and click some item.
 Fas-Dis will start HexWorkShop jump there in via sendkey.
 Sending keystrokes to another program is a little fragile.
@@ -80,7 +80,7 @@ To get more information about the command please look at the function
 Some specifications about the Fas-format are here:
 http://files.planet-dl.org/cw2k/Fas%20AutoLisp-Decompiler/fas-format.htm
 ---------------------------------------------
-##Version history:
+## Version history:
 0.11  Feb 2018
   * improved decompilation 
     +  support for local vars

@@ -1,0 +1,10 @@
+*.pdb
+Fas-Disasm.SUP
+*.7z
+tmp
+*.vbw
+example/defun/defun_test.fas.txt-
+example/defun/defun_test.fas_.lsp-
+example/defun/defun_test.fas.fct
+example/defun/defun_test.fas.res
+*.exe

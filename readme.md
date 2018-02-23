@@ -1,5 +1,5 @@
 # Fas-Disassembler for Visuallisp 0.8
-===================================
+### ===================================
 
 ![ScreenShot](http://imagizer.imageshack.com/img922/1965/nw7j4n.png)
 
@@ -10,8 +10,7 @@ This program will decrypt the resource part of fas
 and fsl files (write it to disk) and disassemble the it.
 With help of the disassembling you can see exactly :) 
 what the program does, how thing are done and you 
-can change some things with help of the offset and 
-an Hexeditor.
+can change some things with help of a Hexeditor.
 
 
 ### Keys:

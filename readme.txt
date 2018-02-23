@@ -1,6 +1,8 @@
 Fas-Disassembler for Visuallisp 0.8
 ===================================
 
+[ScreenShot](http://imagizer.imageshack.com/img922/1965/nw7j4n.png)
+
 Autolisp is a programming language for AutoCAD.
 Lisp sourcecode files have the extension LSP and 
 the compiled Lisp-scripts FAS.
@@ -20,7 +22,7 @@ Enter,Space, Doubleclick on a line to
 Backspace, Num'-' to 
 	go back to old offset
 
-´(key beside Backspace), Num'+' to 
+Â´(key beside Backspace), Num'+' to 
 	go forward
 
 

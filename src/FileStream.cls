@@ -139,6 +139,14 @@ Public Sub StorePos()
       
    mStorePos = Position
 End Sub
+Public Sub StorePosUpdate()
+   If StorePosLock < 0 Then _
+       Err.Raise vbObjectError, "FileStream::StorePosUpdate" _
+               , "There is already one location stored - call RestorePos() first so StorePos() will get free to use!"
+
+      
+   mStorePos = Position
+End Sub
 
 
 
@@ -434,8 +442,8 @@ Public Function getTerminatedString(ParamArray TerminatorStrings()) As String
 
 
    If mMemOnlyMode Then
-      Debug.Assert TerminatorStrings(0) = Chr(0)
-      getTerminatedString = mData.zeroString()
+      Debug.Assert UBound(TerminatorStrings) = 0
+      getTerminatedString = mData.getTerminatedString(TerminatorStrings(0))
    
    
    
@@ -705,7 +713,7 @@ Public Property Get DoubleValue() As Double
 
   If mMemOnlyMode Then Stop ' Not implemented yet
 
-  Dim bytesRead
+  Dim bytesRead&
   bytesRead = ReadFileDouble(hFile, DoubleValue, 8, bytesRead, 0)
   If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
 
@@ -716,7 +724,7 @@ Public Property Get int64Value() As Currency
 
   If mMemOnlyMode Then Stop ' Not implemented yet
    
-  Dim bytesRead
+  Dim bytesRead&
   bytesRead = ReadFileInt64(hFile, int64Value, 8, bytesRead, 0)
   If DisableMoveOnRead Then SeekToPosition bytesRead, FILE_CURRENT
 
@@ -976,7 +984,7 @@ End Property
 
 '////////////////////////////////////////
 '//  Create
-Public Sub Create(Filename As String, Optional bDeleteExistingFile As Boolean, Optional bTemporaryFile As Boolean, Optional Readonly As Boolean)
+Public Sub create(Filename As String, Optional bDeleteExistingFile As Boolean, Optional bTemporaryFile As Boolean, Optional Readonly As Boolean)
    CloseFile
    Me.Filename = Filename
    Me.Readonly = Readonly

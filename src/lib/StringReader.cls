@@ -50,16 +50,18 @@ End Property
 
 
 
-
 Public Property Let zeroString(ByVal vData As String)
     Stop
 End Property
 
-
 Public Property Get zeroString() As String
-   Dim EndOfZeroString As Long
-   EndOfZeroString = InStr(mvarPosition, mvardata, vbNullChar)
-   zeroString = FixedString(EndOfZeroString - mvarPosition)
+   zeroString = getTerminatedString(vbNullChar)
+End Property
+
+Public Property Get getTerminatedString(TerminateChr) As String
+   Dim EndOfString As Long
+   EndOfString = InStr(mvarPosition, mvardata, TerminateChr)
+   getTerminatedString = FixedString(EndOfString - mvarPosition)
  ' Skip over zerobyte at the end of the ZeroTerminatedString
    mvarPosition = mvarPosition + 1
    

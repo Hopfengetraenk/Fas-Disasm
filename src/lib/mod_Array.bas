@@ -105,6 +105,27 @@ Public Sub ArrayRemoveLast(Arr)
    ReDim Preserve Arr(LBound(Arr) To UBound(Arr) - 1)
 End Sub
 
+Public Sub ArrayRemoveFirst(Arr)
+ 
+   Dim ArrSize
+   ArrSize = UBound(Arr) - LBound(Arr)
+ 
+   If ArrSize = 0 Then
+'      Stop 'Array has only one element
+      Arr = Array()
+   Else
+   
+   ' this is only for an Array with 2 elements
+     Debug.Assert ArrSize = 1
+     
+     
+     Arr(0) = Arr(1):
+     ArrayRemoveLast Arr
+   End If
+     
+End Sub
+
+
 Public Sub ArrayDelete(Arr)
    ReDim Arr(0)
    'Arr = Array()
@@ -120,7 +141,7 @@ Public Sub ArraySetLast(Arr, element)
 ArrayEnsureBounds Arr
     Arr(UBound(Arr)) = element
 End Sub
-Public Sub ArrayAppendLast(Arr(), element)
+Public Sub ArrayAppendLast(Arr, element)
 ArrayEnsureBounds Arr
     Arr(UBound(Arr)) = Arr(UBound(Arr)) & element
 End Sub

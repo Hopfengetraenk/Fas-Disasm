@@ -4,7 +4,7 @@ Public Filename$
 Public FileLog_Name
 
 ' length of txt log columns
-Const TXTOUT_OPCODE_COL = 26
+Const TXTOUT_OPCODE_COL = 24
 Const TXTOUT_DISASM_COL = 9
 Const TXTOUT_DESCRIPT_COL = 63
 
@@ -36,11 +36,12 @@ Public Sub DoLog_OutputLine(outp As Log_OutputLine, LineBreaksCount)
       
     ' #1 Offset
     ' comment out when you like to compare output files later
-      OutputLine.Concat .offset
+      OutputLine.Concat BlockAlign_r(.offset, 6 + 1)
+ '     Debug.Assert OffToVal(.offset) < &HFFFFFF
       OutputLine.Concat TxtLog_ItemSeperator
       
     ' #2 n #3 Command & Params
-      OutputLine.Concat BlockAlign_l(.Command_Byte, 8)
+      OutputLine.Concat BlockAlign_r(.Command_Byte, 3)
       OutputLine.Concat TxtLog_ItemSeperator
 
       OutputLine.Concat .Params_Bytes ', 15)
@@ -66,7 +67,7 @@ Public Sub DoLog_OutputLine(outp As Log_OutputLine, LineBreaksCount)
       OutputLine.Concat TxtLog_ItemSeperator
       
    ' #4 Stack
-      OutputLine.Concat .Stack
+      OutputLine.Concat BlockAlign_r(.Stack, 5)
       OutputLine.Concat TxtLog_ItemSeperator
       
       
@@ -94,11 +95,10 @@ Public Sub DoLog_OutputLine(outp As Log_OutputLine, LineBreaksCount)
     ' Add linebreaks
  '     Dim LineBreaksCount
  '     Output_GetLineBreaks .Description, LineBreaksCount
-
+      
       For i = 1 To LineBreaksCount
          OutputLine.Concat vbCrLf
       Next
-
 
       FileLog_Add OutputLine.value
 
@@ -173,9 +173,10 @@ Public Sub SaveDecompiled()
 
    
    Open lsp_Filename For Output Shared As 2
-   Dim item
-   For Each item In FrmMain.LispFileData.Storage
-      Print #2, item
+   Dim item, i
+ ' note: using 'for each' here might dump garbage since Storage might be bigger than .esp
+   For i = 0 To FrmMain.LispFileData.esp
+      Print #2, FrmMain.LispFileData.Storage(i)
    Next
    Close #2
 

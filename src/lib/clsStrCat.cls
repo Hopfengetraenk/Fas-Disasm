@@ -46,7 +46,7 @@ Public Sub Clear()
 End Sub
 
 'String anhängen:
-Public Sub Concat(ByRef value As String)
+Public Sub Concat(ByRef value)
   Dim PointerNew As Long
   
   'Benötigten Buffer berechnen:

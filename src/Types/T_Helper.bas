@@ -6,9 +6,12 @@ Function make_NIL() As T_NIL
    Set make_NIL = New T_NIL
 End Function
 
-Function make_INT(value) As T_INT
+Function make_INT(value, Optional sizeOfInt) As T_INT
    Set make_INT = New T_INT
    make_INT = value
+   
+   make_INT.size = sizeOfInt
+   
 End Function
 
 Function make_REAL(value As String) As T_REAL
@@ -36,7 +39,10 @@ Function make_USUBR(value As String) As T_USUBR
 End Function
 
 
-Function make_ITEM(value) As E_ITEM
+Function make_ITEM(value, Optional NoOutput As Boolean = False) As E_ITEM
    Set make_ITEM = New E_ITEM
    make_ITEM = value
+   
+   make_ITEM.NoOutput = NoOutput
+ 
 End Function

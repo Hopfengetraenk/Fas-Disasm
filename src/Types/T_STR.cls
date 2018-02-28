@@ -34,6 +34,60 @@ End Property
 
 
 Public Property Get toText() As Variant
-   toText = Quote(m_value)
+'   toText = Replace(m_value, vbLf, "\n")
+'   toText = Replace(toText, "\", "\\")
+'   toText = Replace(toText, """", "\""")
+
+   toText = Quote(Escape(toText))
 End Property
+
+Private Function Escape(ByRef Str)
+   Dim inSize:   inSize = Len(Str)
+   
+   If inSize = 0 Then Exit Function
+   
+ ' init outbuffer
+   Dim OutSize: OutSize = inSize
+   Escape = Space(inSize * 2) ' Assuming all are escape chars
+   
+   Dim i, o: o = 1
+   For i = 1 To inSize
+      
+    ' 1. Get char
+      Dim char_in
+      char_in = Mid(Str, i, 1)
+      
+      Dim Changed As Boolean:    Changed = True
+      Dim char_out:              char_out = char_in
+      
+    ' 2. Translate
+      Select Case char_in
+         Case vbLf:         char_out = "n"
+         Case vbCr:         char_out = "r"
+         Case vbTab:        char_out = "t"
+         Case Chr(&H1B):    char_out = "e"
+         
+         Case """", "\":
+         Case Else::           Changed = False
+      End Select
+    ' incase you also need to implement that  \000 octal thing
+    ' also adjust the init
+      
+      
+      ' Mask
+      If Changed Then
+         char_out = "\" & char_out:
+      End If
+    
+    
+    ' 3. Set char
+      Mid(Escape, o) = char_out:   Inc o, Len(char_out)
+      Inc OutSize, Len(char_out)
+      
+   Next
+   
+ ' shrink to real size
+   Escape = Left(Escape, OutSize)
+   
+End Function
 

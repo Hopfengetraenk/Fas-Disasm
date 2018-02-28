@@ -108,7 +108,6 @@ Public Sub ToTextRek(item)
    Inc m_NestLevel
    
    Output.Concat List_PreFix
-   
       If TypeOf item Is Collection Then
          ToTextRek item
       Else

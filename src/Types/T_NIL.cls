@@ -17,11 +17,16 @@ Option Explicit
 Const opcode& = &H1  'Ld_NIL
 '(type NIL)                   returns  NIL
 
+Public SupressOutput As Boolean
 'Quote(value)
+
 
 Public Property Get value() As Variant
 Attribute value.VB_UserMemId = 0
-   value = "NIL"
+   If SupressOutput = False Then
+      value = "NIL"
+   '   value = "'()"
+   End If
 End Property
 
 

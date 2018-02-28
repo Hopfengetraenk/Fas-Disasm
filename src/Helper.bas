@@ -100,7 +100,7 @@ Public Const ERR_GUI_CANCEL = vbObjectError + ERR_GUIEVENTS + 1
 
 Public i, j
 
-Private Declare Function SetWindowPos Lib "user32" (ByVal Hwnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
+Private Declare Function SetWindowPos Lib "user32" (ByVal Hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long) As Long
 Private Const HWND_TOPMOST = -1
 Private Const SWP_NOSIZE = &H1
 Private Const SWP_NOMOVE = &H2
@@ -543,6 +543,10 @@ End Function
 Public Function Quote(ByRef Text) As String
    Quote = """" & Text & """"
 End Function
+Public Function DeQuote(ByRef Text) As String
+   DeQuote = Split(Text, """")(1)
+End Function
+
 
 Public Function Brackets(ByRef Text As String) As String
    Brackets = "(" & Text & ")"
@@ -563,7 +567,7 @@ End Function
 
 
 
-Public Function Collection_IsAlreadyIn(CollectionToTest As Collection, Key$) As Boolean
+Public Function Collection_IsAlreadyIn(CollectionToTest As Collection, Key) As Boolean
    Dim Description$, Number&, Source$
    Description = Err.Description
    Number = Err.Number
@@ -694,7 +698,7 @@ End Sub
 Public Function FileLoad$(Filename$, Optional MaxLength& = -1)
    Dim File As New FileStream
    With File
-      .Create Filename, False, False, True
+      .create Filename, False, False, True
       FileLoad = .FixedString(MaxLength)
       .CloseFile
    End With
@@ -704,7 +708,7 @@ Public Sub FileSave(Filename$, data$)
    On Error GoTo err_FileSave
    Dim File As New FileStream
    With File
-      .Create Filename, True, False, False
+      .create Filename, True, False, False
       .FixedString(-1) = data
       .CloseFile
    End With
@@ -937,6 +941,30 @@ Public Function boolToText(BoolValue)
    boolToText = IIf(BoolValue, "+", "-")
 End Function
 
+' Evaluates all expressions
+' returns true if ONE of them are true
+Public Function Or_(ParamArray Expressions()) As Boolean
+   Or_ = True
+   
+   Dim item
+   For Each item In Expressions
+      If Or_ = True Then Exit Function
+   Next
+   
+   Or_ = False
+End Function
 
+' Evaluates all expressions
+' returns true if ALL of them are true
+Public Function And_(ParamArray Expressions()) As Boolean
+'   And_ = false ' boolean default
+   
+   Dim item
+   For Each item In Expressions
+      If item = False Then Exit Function
+   Next
+   
+   And_ = True
+End Function
 
 

@@ -2,9 +2,9 @@ Attribute VB_Name = "fas_file"
 Option Explicit
 
 'Assign each command some color
-Public Function GetColor_Cmd(cmd)
+Public Function GetColor_Cmd(Cmd)
   '
-   GetColor_Cmd = RandInt_24bit(cmd)
+   GetColor_Cmd = RandInt_24bit(Cmd)
 End Function
 
 Public Function GetColor_Type(TypeName)
@@ -36,28 +36,34 @@ End Function
 'End Function
 
 Public Function JoinToText(ParamArray items())
-'   Dim item
+'   Dim item, items_Count
 '   Dim tmp As New clsStrCat
 '   For Each item In items(0)
-'      tmp.Concat item.toText
-'      tmp.Concat " "
+'      tmp.Concat item
+'      If (items_Count And &H7) = &H7 Then
+'         tmp.Concat vbCrLf
+'      Else
+'         tmp.Concat " "
+'      End If
+'
+'      Inc items_Count
 '   Next
 '   tmp.RemoveLast 2
 
    JoinToText = Join(items(0)) ' tmp.value
-'   JoinToText = tmp.value
+ '  JoinToText = tmp.value
 
 End Function
 'Create Lisp Token from Keyword
 ' print, "hello world" -> "(print "hello world")"
 
-Public Function TokenFull(keyword, ParamArray params())
+Public Function TokenFull(Keyword, ParamArray Params())
 Err.Clear
 On Error Resume Next
-   TokenFull = TokenOpen(keyword) & JoinToText(params(0)) & TokenClose(keyword)
+   TokenFull = TokenOpen(Keyword) & JoinToText(Params(0)) & TokenClose(Keyword)
    If Err = 13 Then 'Type mismatch
       Err.Clear
-      TokenFull = TokenOpen(keyword) & JoinToText(params) & TokenClose(keyword)
+      TokenFull = TokenOpen(Keyword) & JoinToText(Params) & TokenClose(Keyword)
       If Err Then
 '         TokenFull = TokenOpen(keyword) & params(0).ToText & TokenClose(keyword)
          If Err Then Stop
@@ -66,11 +72,23 @@ On Error Resume Next
    
 End Function
 
-Public Function TokenOpen(keyword, Optional IndentLevel = 0)
-   TokenOpen = GetIndent(IndentLevel) & "(" & keyword & " "
+Public Function TokenComment(Line, Optional IndentLevel = 0)
+   If Line <> "" Then
+      TokenComment = GetIndent(IndentLevel) & ";;; " & Line
+   End If
 End Function
-Public Function TokenClose(Optional keyword)
-   TokenClose = ")"
+
+' ((= (atof (getvar 'AcadVer)) 18.0) ;| 2010 code here |;)
+Public Function TokenInlineComment(Text)
+   TokenInlineComment = ";| " & Text & " |;"
+End Function
+
+
+Public Function TokenOpen(Keyword, Optional IndentLevel = 0)
+   TokenOpen = GetIndent(IndentLevel) & "(" & Keyword & " "
+End Function
+Public Function TokenClose(Optional Keyword, Optional IndentLevel = 0)
+   TokenClose = GetIndent(IndentLevel) & ")"
 End Function
 
 Public Function TokenRemove(Expr)

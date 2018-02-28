@@ -50,7 +50,7 @@ End Sub
 '// commandLineSplitRek -  Split the commandLine and store chunks in args() and argsWithQuotes()
 '//                        should only used by the Constructor
 Private Sub commandLineSplitRek(CommandLine As String, Optional oldPos% = 1, Optional levelCounter = 0)
-   Dim endPos%                ' Endposition for cut (...e.exe"<-)
+   Dim EndPos%                ' Endposition for cut (...e.exe"<-)
    Dim newStartPos%           ' Startposition for "new" commandline (->"C:\p...")
    Dim bIsQuoted As Boolean
    Dim bEndLine As Boolean
@@ -60,20 +60,20 @@ Private Sub commandLineSplitRek(CommandLine As String, Optional oldPos% = 1, Opt
      bIsQuoted = Left$(CommandLine, 1) = """"
      If bIsQuoted Then
        'find next "
-        endPos = InStr(2, CommandLine, """")
+        EndPos = InStr(2, CommandLine, """")
      Else
        'deincrement endpos -delete last quote
-        endPos = InStr(1, CommandLine, " ") - 1
+        EndPos = InStr(1, CommandLine, " ") - 1
      End If
      
-     bEndLine = endPos = Len(CommandLine)
-     bNoQuotedAtEnd = bIsQuoted And bEndLine And (endPos = 0)
+     bEndLine = EndPos = Len(CommandLine)
+     bNoQuotedAtEnd = bIsQuoted And bEndLine And (EndPos = 0)
           
    ' Check if we reached the end
-     If endPos <= 0 Or bEndLine Then
+     If EndPos <= 0 Or bEndLine Then
      
       ' we are at the end so endPos = length of CommandLine
-        endPos = Len(CommandLine)
+        EndPos = Len(CommandLine)
         
       ' create array for saving commandline arguments
         NumberOfCommandLineArgs = levelCounter + 1
@@ -85,7 +85,7 @@ Private Sub commandLineSplitRek(CommandLine As String, Optional oldPos% = 1, Opt
      
              
       ' Filter out any whitespaces (for ex. 2 Spaces like ..exe"   "C:\..)
-        For newStartPos = endPos + 1 To Len(CommandLine)
+        For newStartPos = EndPos + 1 To Len(CommandLine)
             If Mid(CommandLine, newStartPos, 1) > " " Then Exit For
         Next
              
@@ -93,11 +93,11 @@ Private Sub commandLineSplitRek(CommandLine As String, Optional oldPos% = 1, Opt
         commandLineSplitRek Mid(CommandLine, newStartPos), newStartPos, levelCounter + 1
      End If
     'Save Data in Array
-     argsWithQuotes(levelCounter) = Mid(CommandLine, 1, endPos)
+     argsWithQuotes(levelCounter) = Mid(CommandLine, 1, EndPos)
      If bIsQuoted Then
-        Args(levelCounter) = Mid(CommandLine, 2, endPos - 2)
+        Args(levelCounter) = Mid(CommandLine, 2, EndPos - 2)
      Else
-        Args(levelCounter) = Mid(CommandLine, 1, endPos)
+        Args(levelCounter) = Mid(CommandLine, 1, EndPos)
      End If
 End Sub
 Private Function GetCommandLine() As String

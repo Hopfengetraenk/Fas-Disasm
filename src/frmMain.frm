@@ -11,6 +11,16 @@ Begin VB.Form FrmMain
    OLEDropMode     =   1  'Manuell
    ScaleHeight     =   7992
    ScaleWidth      =   11748
+   Begin VB.CheckBox Chk_Brancher 
+      Caption         =   "Disable Brancher"
+      Height          =   432
+      Left            =   3360
+      TabIndex        =   18
+      ToolTipText     =   $"frmMain.frx":030A
+      Top             =   480
+      Visible         =   0   'False
+      Width           =   1020
+   End
    Begin MSComctlLib.Slider Slider_Zoom 
       Height          =   432
       Left            =   1440
@@ -23,8 +33,10 @@ Begin VB.Form FrmMain
       _Version        =   393216
       MousePointer    =   15
       Orientation     =   1
+      LargeChange     =   25
+      SmallChange     =   25
       Min             =   40
-      Max             =   100
+      Max             =   115
       SelStart        =   44
       TickStyle       =   3
       TickFrequency   =   20
@@ -148,7 +160,7 @@ Begin VB.Form FrmMain
          Height          =   195
          Left            =   120
          TabIndex        =   4
-         ToolTipText     =   $"frmMain.frx":030A
+         ToolTipText     =   $"frmMain.frx":03C5
          Top             =   0
          Width           =   1260
       End
@@ -173,7 +185,7 @@ Begin VB.Form FrmMain
       Enabled         =   0   'False
       Interval        =   100
       Left            =   11040
-      Top             =   240
+      Top             =   120
    End
    Begin VB.CommandButton cmd_back 
       Caption         =   "Back <<<"
@@ -195,6 +207,7 @@ Begin VB.Form FrmMain
       _ExtentX        =   19918
       _ExtentY        =   11451
       View            =   3
+      LabelEdit       =   1
       LabelWrap       =   0   'False
       HideSelection   =   0   'False
       AllowReorder    =   -1  'True
@@ -312,7 +325,7 @@ Begin VB.Form FrmMain
       MultiLine       =   -1  'True
       OLEDropMode     =   1  'Manuell
       TabIndex        =   16
-      Text            =   "frmMain.frx":0397
+      Text            =   "frmMain.frx":0452
       Top             =   960
       Width           =   11175
    End
@@ -354,6 +367,8 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+
+Private Const log_parameter_Show_size As Boolean = 0
 
 #If DoDebug = 0 Then
    Private Const InterpretingProgress_FORMUPDATE_EVERY& = 300
@@ -438,7 +453,7 @@ Private Sub StartWork()
          
        ' Start Decompiling...
          On Error Resume Next
-         File.Create Filename
+         File.create Filename
 
       End If
       
@@ -489,6 +504,10 @@ Finally:
 End Sub
 
 
+Private Sub Chk_Brancher_Click()
+'   File.Cond_Disable = Chk_Brancher.value = vbChecked
+End Sub
+
 Private Sub Chk_Cancel_Click()
    If Chk_Cancel = vbChecked Then
       AddtoLog "Cancel request by user"
@@ -496,6 +515,13 @@ Private Sub Chk_Cancel_Click()
    End If
 End Sub
 
+
+Private Sub Chk_HexWork_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+   If Button = vbRightButton Then
+      LV_Log.HoverSelection = Not LV_Log.HoverSelection
+      Chk_HexWork.FontBold = LV_Log.HoverSelection
+   End If
+End Sub
 
 Private Sub chk_Inspector_Click()
    frmInspector.Visible = chk_Inspector.value = vbChecked
@@ -655,7 +681,7 @@ Private Sub Listview_OutputLine(outp As Log_OutputLine, LineBreaksCount, FasCmdl
      
      LV_Log_Ext.ListSubItem(li, "sp") = .Stack
      
-   ' #5 Parameters
+   ' #5 Description & DeCompiled
      LV_Log_Ext.ListSubItem(li, "descr") = .Description
      LV_Log_Ext.ListSubItem(li, "decomp") = .DeCompiled
 
@@ -663,7 +689,7 @@ Private Sub Listview_OutputLine(outp As Log_OutputLine, LineBreaksCount, FasCmdl
     '  Dim LineBreaksCount
     '  Output_GetLineBreaks .Description, LineBreaksCount
 
-      For i = 1 To LineBreaksCount
+      For i = 1 To Min(LineBreaksCount, 2)
          LV_Log.ListItems.add
       Next
       
@@ -714,25 +740,25 @@ Private Sub File_InterpretingProgress(FasCmdlineObj As FasCommando)
 
   
  ' Parameters
-   Dim params, item
-   ReDim params(FasCmdlineObj.Parameters.count)
-   
-   Dim i
-   For i = 1 To FasCmdlineObj.Parameters.count
-      item = FasCmdlineObj.Parameters(i)
-'      Select Case TypeName(item)
-'
-'         Case "Long", "Integer", "Byte"
-           params(i) = item
-'
-'         Case "String"
-'           params(i) = """" & item & """"
-'
-'      End Select
-   Next
+   Dim Params, item
+   ReDim Params(FasCmdlineObj.Parameters.count)
    
    On Error Resume Next
-   Out.Params_Bytes = Join(params)
+   Dim i
+   For i = 1 To FasCmdlineObj.Parameters.count
+      Let item = FasCmdlineObj.Parameters(i)
+      Set item = FasCmdlineObj.Parameters(i)
+     
+      If log_parameter_Show_size And _
+         TypeOf item Is T_INT Then
+         Params(i) = Format(item, String(item.size * 2, "0"))
+      Else
+         Params(i) = item
+      End If
+   Next
+   
+   'On Error Resume Next
+   Out.Params_Bytes = Join(Params)
    Err.Clear   ' Assume: .Params_Bytes are initialised with ""
    
   
@@ -761,6 +787,8 @@ Private Sub File_InterpretingProgress(FasCmdlineObj As FasCommando)
    If chk_Decryptonly = vbUnchecked Then
       Listview_OutputLine Out, LineBreaksCount, FasCmdlineObj
    End If
+   
+   asd
    
 End Sub
 
@@ -793,8 +821,12 @@ Private Sub Listview_ScrollToItem(li As MSComctlLib.ListItem)
 End Sub
 
 Private Sub Form_Initialize()
+Dim a
+a = And_(True)
+
+
  ' Bind Listview extender to listview
-   LV_Log_Ext.Create LV_Log
+   LV_Log_Ext.create LV_Log
 End Sub
 
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
@@ -805,7 +837,7 @@ Sub LV_Log_ColumnHeadersSize_restore()
   'Restore Listview Columns
    Dim CH As ColumnHeader, tmp$
    For Each CH In LV_Log.ColumnHeaders
-      CH.Width = GetSetting(App.EXEName, "Listview", CH.Key, CH.Width)
+      CH.Width = GetSetting(App.EXEName, "Listview", CH.key, CH.Width)
 '      Debug.Print CH.Width
    Next
 
@@ -813,7 +845,7 @@ End Sub
 Sub LV_Log_ColumnHeadersSize_save()
    Dim CH As MSComctlLib.ColumnHeader, tmp$
    For Each CH In LV_Log.ColumnHeaders
-      SaveSetting App.EXEName, "Listview", CH.Key, CH.Width
+      SaveSetting App.EXEName, "Listview", CH.key, CH.Width
    Next
 End Sub
 
@@ -1038,6 +1070,7 @@ Private Sub Nav_forward()
 End Sub
 
 Private Sub Nav_back()
+On Error Resume Next
    Dim item As MSComctlLib.ListItem
    
    If nav_PositionHistory.esp Then
@@ -1104,7 +1137,7 @@ Private Sub Nav_to()
        ' Check for valid offset (can listitem with .key be found)
          On Error Resume Next
          Dim moduleID
-         moduleID = IIf(Rawtext Like "*Modul:0*", 1, 0)
+         moduleID = IIf(Rawtext Like "*Modul:0*", 0, 1)
          Set item = LV_Log_Ext.OffsetKeyGet(moduleID, RawTextPart)
          If Err = 0 Then
             
@@ -1226,15 +1259,15 @@ End Sub
 
 
 
-Private Sub Text1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Text1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
    DragEvent data
 End Sub
 
-Private Sub List1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub List1_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
    DragEvent data
 End Sub
 
-Private Sub Form_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
    DragEvent data
 End Sub
 

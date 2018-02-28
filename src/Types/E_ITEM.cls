@@ -15,6 +15,9 @@ Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
 Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
 
+'to mark internal commands and supress it's output
+Public NoOutput As Boolean
+
 Private mvarvalue As Variant
 Public Property Let value(ByVal vData As Variant)
     mvarvalue = vData

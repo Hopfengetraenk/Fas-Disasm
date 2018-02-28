@@ -24,6 +24,8 @@ Public Stack_Pointer_After
 Public Stack_Before
 Public Stack_After
 
+Public FasFile As FasFile
+
 Public Disassembled_Short As String
 Public Description As String
 
@@ -34,12 +36,12 @@ Private mvarDisassembled As String
 
 'lokale Variable(n) zum Zuweisen der Eigenschaft(en)
 Private mvarInterpreted As String 'lokale Kopie
-Public Property Let Interpreted(ByVal vData As String)
+Public Property Let Interpreted(ByVal vData)
     mvarInterpreted = vData
 End Property
 
 
-Public Property Get Interpreted() As String
+Public Property Get Interpreted()
     Interpreted = mvarInterpreted
 End Property
 

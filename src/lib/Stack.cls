@@ -82,7 +82,7 @@ End Property
 
 Public Sub push(data As Variant)
  
-'   On Error GoTo push_err
+   On Error GoTo push_err
 
    If (Storage.count = 0) Or (esp >= Storage.count) Then
      'Insert into empty list or insert at the End
@@ -98,33 +98,34 @@ Public Sub push(data As Variant)
    Inc esp
  
 'catch
-'push_err:
-' Select Case Err
-'    Case 0:
-'    Case 5:
-''      If ESP = 0 Then
-'         Storage.Add data
-'         Resume Next
-'   '   Else
-'  '       Stop
-' '     End If
-'    Case 9: 'Index außerhalb des gültigen Bereichs
-'      If ESP > 0 Then
-'        Storage.Add "FillData"
-'      ElseIf ESP = 0 Then
-'         Storage.Add data, , 1
-'         Resume Next
-'      Else
-'         ESP = 0
-'      End If
-'       Resume
-'    Case Else
-'        Err.Raise Err, , Err.Description
-'End Select
-''Finally
+push_err:
+ Select Case Err
+    Case 0:
+    Case 5:
+'      If ESP = 0 Then
+         Storage.add data
+         Resume Next
+   '   Else
+  '       Stop
+ '     End If
+    Case 9: 'Index außerhalb des gültigen Bereichs
+      If esp > 0 Then
+        Storage.add "FillData"
+      ElseIf esp = 0 Then
+         Storage.add data, , 1
+         Resume Next
+      Else
+         esp = 0
+      End If
+       Resume
+    Case Else
+        Err.Raise Err, , Err.Description
+End Select
+'Finally
 
 
 End Sub
+
 
 Sub popIntoVoid()
     esp = esp - 1
@@ -170,8 +171,11 @@ End Property
 Property Get popArray(NumberOfElements) As Variant
    
    Dim tmp
-   If NumberOfElements < 1 Then
-      ReDim tmp(1 To 1)
+   If NumberOfElements < 0 Then
+      Stop 'Error NumberOfElements is negative
+
+   ElseIf NumberOfElements = 0 Then
+      tmp = Array()
    
    Else
       ReDim tmp(1 To NumberOfElements)

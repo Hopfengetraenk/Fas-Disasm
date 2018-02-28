@@ -14,6 +14,12 @@ Attribute VB_Exposed = False
 Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
 Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
+
+Private Const opt_patches As Boolean = 0
+
+Private Const opt_Log_DumpModulVars As Boolean = 1
+
+
 Private LocalVars
 ' Fas4 Files are created by
 ' Vllib.dll/.rsrc/1212/ALCGEN.FSL
@@ -38,15 +44,18 @@ Private Const LTFAS_FILE_SIGNATURE$ = "AutoCAD LT OEM Product"
 
 Private Const FSL_FILE_SIGNATURE$ = "1Y"
 
+Public FasFile_Version
+
 Private File As New FileStream
 
 Private CreateFilesTemporary As Boolean
 
+
+' M o d u l  v a r
 'The current active stream/module
 'currently there only two used
 '0 -init/main / FasResourceData .res
 '1 -functions / FasFunctionData .fct
-
 Public m_MVar As Variant
 Private m_MVars(1) As Variant
 
@@ -126,11 +135,14 @@ Dim FasCmdline As FasCommando
 
 
 
-Dim Label_Push_col As New Collection
+'Dim Label_Push_col As New Collection
 Dim LevelStack As New Stack
 Dim level As Integer
 
 
+Public Property Get Cond_Disable() As Boolean
+   Cond_Disable = FrmMain.Chk_Brancher.value = vbChecked
+End Property
 
 'Private Property Let Filename(ByVal vData As String)
 '    mvarFilename = vData
@@ -354,7 +366,8 @@ End Sub
 
 
 Private Sub InterpretStream(FileStream As FileStream, Target As Collection)
-   RaiseEvent InterpretingBegin(FileStream.Length)
+ ' + FasFunctionData because they are processed together
+   RaiseEvent InterpretingBegin(FileStream.Length + FasFunctionData.Length)
    
       InterpretStream_rek FileStream, Target
    RaiseEvent InterpretingDone
@@ -376,9 +389,9 @@ Public Property Get LVars(idx) As Fas_LVar
    End If
    
    If idx = 0 Then Exit Property
-   Debug.Print "Get LVars(" & idx & " ):" & FasFuncCurrent.LocalVars(idx) & " " & FasFuncCurrent.FuncName
-   Debug.Print "     MVars(" & idx & ",0):", MVarsEx(idx, 0)
-   Debug.Print "     MVars(" & idx & ",1):", MVarsEx(idx, 1)
+'   Debug.Print "Get LVars(" & idx & " ):" & FasFuncCurrent.LocalVars(idx) & " " & FasFuncCurrent.FuncName
+'   Debug.Print "     MVars(" & idx & ",0):", MVarsEx(idx, 0)
+'   Debug.Print "     MVars(" & idx & ",1):", MVarsEx(idx, 1)
 'asd
 'Stop
 'asd
@@ -529,48 +542,57 @@ Public Sub asSymbol(item)
      item.AsSYM = True
   End If
 End Sub
-'Execute some Progn block
-Private Function DoProgn(FileStream As FileStream, Target As Collection, EndPos, level)
-  Dim BeforeProgn
-  BeforeProgn = FrmMain.LispFileData.esp
-  
-' process  'Then' Branch
-  InterpretStream_rek FileStream, Target, EndPos, level + 1
- 
- ' >>> progn ==
-   Dim prognCount
-   prognCount = FrmMain.LispFileData.esp - BeforeProgn
+
+' Output item
+Public Sub outp(item)
+   With FasStack
    
-   Dim Part
-   If prognCount Then
-     ArraySetFirst Part, TokenOpen("progn")
-     
-     Dim prognItems
-     prognItems = FrmMain.LispFileData.popArray(prognCount)
-     
-     Dim item
-     For Each item In prognItems
-       ArrayAdd Part, item
-     Next
-     
-     
-     ArrayAdd Part, FasStack.pop
-     ArrayAdd Part, TokenClose("progn")
-     
-     DoProgn = Join(Part, vbCrLf & " ")
-   Else
-   
-     DoProgn = FasStack.pop
-   End If
- ' <<< progn ==
+    ' Enqueue item for output
+    ' -> Push item on stack
+    ' -> Ouput it directly if stack is empty
+      If .esp = 0 Then
+          FasCmdline.Interpreted = item
+          RaiseEvent InterpretingProgress(FasCmdline)
+      Else
+          .Current = item
+      
+      End If
+   End With
+End Sub
+Public Function IsNextCommand(FileStream As FileStream, ExpectedValue As Byte, Optional seekback = True) As Boolean
+   With FileStream
+      Dim NextCmd
+      NextCmd = .int8: If seekback Then .Move -1
+      IsNextCommand = ExpectedValue = NextCmd
+   End With
 End Function
 
 
-Private Sub InterpretStream_rek(FileStream As FileStream, Target As Collection, Optional StopAtOffset = &H7FFFFFFF, Optional level = 0, Optional Stackadd = 0, Optional ANDDest = 0, Optional InterpretStream_AND_6A_Helper = 0)
+Public Sub InterpretStream_output( _
+                                    DisASM As String, _
+                                    DisASM_short, _
+                                    Description _
+                                 )
+'     FasCmdline.Interpreted = Interp
+      FasCmdline.Disassembled_Short = DisASM_short
+      FasCmdline.Disassembled = GetIndent(level) & DisASM
+      FasCmdline.Interpreted = GetIndent(level) & FasCmdline.Interpreted
+      
+      RaiseEvent InterpretingProgress(FasCmdline)
+      
+End Sub
+Private Function CollectionQuery(Collection As Collection, Key$)
+   ' Create and Get itemCounter
+     If Not Collection_IsAlreadyIn(Collection, Key) Then
+         Collection.add make_ITEM(0), Key
+     End If
+     Set CollectionQuery = Collection(Key)
+End Function
+
+Public Sub InterpretStream_rek(FileStream As FileStream, Target As Collection, Optional StopAtOffset = &H7FFFFFFF, Optional level = 0, Optional Stackadd = 0, Optional ANDDest = 0, Optional InterpretStream_AND_6A_Helper = 0)
 
 On Error GoTo InterpretStream_rek_err
    Dim tmp, tmp2, tmp3, dummy, ax As Long, cx As Long, ebx, edi
-'   Dim case_43_counter  'helps to decide which stringtable to use
    Dim DisASM As String, DisASM_short As String
    Dim Description As String
 
@@ -578,11 +600,17 @@ On Error GoTo InterpretStream_rek_err
    Dim LambdaOpenParatheseCount&
 
    
+   
+   
    Dim StartEsp&
    StartEsp = FasStack.esp
    FasStack.esp = FasStack.esp + Stackadd
    
-
+ ' Create brancher obj
+   Dim Brancher As New Fas_Brancher
+   Set Brancher = New Fas_Brancher
+   Brancher.create FileStream, FasStack, Me, level
+   
    With FileStream
       
       
@@ -592,6 +620,8 @@ On Error GoTo InterpretStream_rek_err
          Set FasCmdline = New FasCommando
             
             
+         Set FasCmdline.FasFile = Me
+         
        ' Store current Offset
          FasCmdline.Position = .Position
          
@@ -613,8 +643,8 @@ On Error GoTo InterpretStream_rek_err
 '         End If
          
          Set FasCmdline.Parameters = New Collection
-         Dim param As Collection
-         Set param = FasCmdline.Parameters
+         Dim Param As Collection
+         Set Param = FasCmdline.Parameters
          
        ' add FasCmdline Object to Target collection
 '         Target.Add FasCmdline
@@ -623,7 +653,7 @@ On Error GoTo InterpretStream_rek_err
          DisASM_short = ""
          Description = ""
        
-         Label_Pop FasCmdline.Position
+'         Label_Pop FasCmdline.Position
        
        ' Process Commands
          Select Case FasCmdline.Commando
@@ -649,19 +679,19 @@ On Error GoTo InterpretStream_rek_err
             
           ' GetParams (4x Byte)
             Dim p1_LVrs, p2_Args, p2_Args_Max, p2_GC
-            param.add .int8
+            Param.add make_INT(.int8, 1)
             
-               param.add .int8
-               p2_Args = param(2)
+               Param.add make_INT(.int8, 1)
+               p2_Args = Param(2)
 
-               param.add .int8
-               p2_Args_Max = param(3)
+               Param.add make_INT(.int8, 1)
+               p2_Args_Max = Param(3)
 
                
 
-            param.add .int8 'and         eax,0FFFE
-            ax = param(4)
-            cx = param(1)
+            Param.add make_INT(.int8, 1) 'and         eax,0FFFE
+            ax = Param(4)
+            cx = Param(1)
           ' ax and cx represents a 15 bit value with the order axcx
           ' the last bit of ax is discarded
             p1_LVrs = ((ax And &HFE) * &H80) Or cx
@@ -690,14 +720,22 @@ On Error GoTo InterpretStream_rek_err
              ' TODO: Lookup the real names of these two function in the FSL-Files
                If p2_Args = 1 Then
                
+               '# PreInit for ThisStream::Loader
+                  Set FasFuncCurrent = New FasFunction
+                  FasFuncCurrent.FuncName = "fs_init"
+                  
                   Dim Arg1$
                   Arg1 = "funcStream"
+                  FasFuncCurrent.Args.add Arg1
                   
                   LVars(0) = Arg1
                   
-                  DisASM = "fs-init " & Arg1
                Else
-                  DisASM = "Main"
+               
+               '# PreInit for ThisStream::Main
+                  Set FasFuncCurrent = New FasFunction
+                  FasFuncCurrent.FuncName = "main"
+
                   
                 ' Memorize Start of Main to seek there after decompiling
                   ResourceStream_DefunMain = FasCmdline.Position
@@ -716,35 +754,48 @@ On Error GoTo InterpretStream_rek_err
             Const ERR_InvProcCall& = 13
             Const ERR_ObjVarOrWithBlockNotSet& = 91
             
+          ' Look Functionname
+            Dim FuncName
             Set FasFuncCurrent = FasFunctionnames(CStr(FasCmdline.Position))
-            DisASM = FasFuncCurrent.FuncName
+            FuncName = FasFuncCurrent.FuncName
+            
             If (bSuppressDecompOutput = False) And (Err = ERR_InvProcCall Or Err = ERR_ObjVarOrWithBlockNotSet) Then
                FrmMain.AddtoLog "Warning: Couldn't get func name for (defun @" & OffToStr(FasCmdline.Position)
             End If
             
-            If isFas Then
-               tmp = "defun"
-            Else
-               tmp = "defun-q"
-            End If
+          ' Keyword
+            Dim Keyword
+            Keyword = IIf(isFas, "defun", "defun-q")
             
             If (Not FasFuncCurrent Is Nothing) Then
                If FasFuncCurrent.isLambda Then
-                  tmp = "lambda"
-                  DisASM = ""
+                  Keyword = "lambda"
+                  FuncName = ""
                End If
             End If
 
-          ' test for push NIL
-          ' to show that there are no more args
-            If .int8 = &H1 Then
-               tmp2 = "() "
+          ' Process Arguments
+            Dim Args As clsStrCat: Set Args = New clsStrCat
+            If p2_Args = 0 Then
+             ' to show that there are no more args
+               Args.Concat TokenFull("")
             Else
-               tmp2 = ""
-            End If
-            .Move -1
             
-            DisASM = TokenOpen(tmp) & DisASM & " " & tmp2
+               Args.Concat TokenOpen("", level)
+               
+             ' Concat args
+               With FasFuncCurrent: Dim arg
+               If .Args.count Then
+               For Each arg In .Args
+                        Args.Concat arg & " "
+               Next: End If: End With
+               
+               Args.Concat TokenClose("", level)
+
+            End If
+            
+          ' Make Function definition
+            DisASM = TokenOpen(Keyword) & FuncName & " " & Args.value
             
             
           ' Chanced for optimising function + param output
@@ -781,8 +832,8 @@ On Error GoTo InterpretStream_rek_err
             
             DisASM = "FAS2 & disasm "
             
-            param.add .int16 '
-            DisASM = DisASM & MVars(param(1))
+            Param.add make_INT(.int16, 2) '
+            DisASM = DisASM & MVars(Param(1))
             'push clng(3)
          
          
@@ -797,46 +848,58 @@ On Error GoTo InterpretStream_rek_err
             FasStack.push tmp ' or '()
             
          Case &H2
-            FasStack.push "T"
+            FasStack.push make_ITEM("T")
             DisASM = "Push T" 'command AND?
 
 
 ' === Local Vars ===
             
         'Get _FSL
-         Case &H5: 'push Local Var8 on Stack
-            param.add .int8           ' GetVarIdx
-            tmp = LVars(param(1))     ' GetValue
-            DisASM = "push_FSL LVar" & tmp & "  push Local Var8 on Stack"
-            FasStack.push tmp           ' Push Value onto Stack
+'         Case &H5: 'push Local Var8 on Stack '00000101
+'            param.add make_INT(.int8, 1)           ' GetVarIdx
+'            tmp = LVars(param(1))     ' GetValue
+'            DisASM = "push_FSL LVar" & tmp & "  push Local Var8 on Stack"
+'            FasStack.push tmp           ' Push Value onto Stack
 
         'Set _FSL
-         Case &H8: 'FSL pop into Local Var8
-            param.add .int8         ' GetVarIdx
+         Case &H8: 'FSL pop into Local Var8 '00001000
+            Param.add make_INT(.int8, 1)         ' GetVarIdx
             tmp = FasStack.pop      ' GetValue from Stack
-            DisASM = "LVar8_" & LVars(param(1)) & " = " & tmp
-            LVars(param(1)) = tmp   ' Assign Value
+            DisASM = "LVar8_" & LVars(Param(1)) & " = " & tmp
+            LVars(Param(1)) = tmp   ' Assign Value
             
             'FasCmdline.Interpreted = disasm
             
         'Zero _FSL
-         Case &H64: 'FSL clear Local Var8
-            param.add .int8         ' GetVarIdx
-            DisASM = "clear LVar8_" & LVars(param(1))
-            LVars(param(1)) = "<Deleted LVar8>"    'Set Value to Zero
+         Case &H64: 'FSL clear Local Var8 '01100100
+            Param.add make_INT(.int8, 1)         ' GetVarIdx
+            DisASM = "clear LVar8_" & LVars(Param(1))
+            LVars(Param(1)) = "<Deleted LVar8>"    'Set Value to Zero
          
 
 
         'LVar16=[ebp-18h] or [local.6] <= LVar
          
         'Get _FAS
-         Case &H5C 'push Local Var16 on Stack
-            DisASM_short = "getVAR"
+         Case &H5, &H5C 'push Local Var16 on Stack '01011100
+            Dim bisFas As Boolean
+            bisFas = FasCmdline.Commando = &H5C
+
+            DisASM_short = IIf(bisFas, "F_", "") & "getVAR"
             Description = "Push global Var => stack; 1x Param"
             
             Dim LVarIdx
-            param.add .int16                ' GetVarIdx
-            LVarIdx = param(1)
+            LVarIdx = .int8 ' GetVarIdx
+            
+          ' in Fas-Version this value is 16 bit
+            If bisFas Then
+            
+               Debug.Assert .int8 = 0 ' Get highPart of VarIdx
+               'If not null get as 16 bitvalue
+
+            End If
+
+            Param.add LVarIdx
             
             Dim LVarValue
             Set LVarValue = LVars(LVarIdx)       ' GetValue
@@ -847,13 +910,13 @@ On Error GoTo InterpretStream_rek_err
          'don't forget to adapt 'case 43' also if you modify this
          
         'Set _FAS
-         Case &H5D 'pop into Local Var16
+         Case &H5D 'pop into Local Var16 '01011101
           ' GetVarIdx
             DisASM_short = "setVAR"
             Description = "Pop global stack => Var; 1x Param"
 
-            param.add .int16         ' GetVarIdx
-            LVarIdx = param(1)
+            Param.add make_INT(.int16, 2)         ' GetVarIdx
+            LVarIdx = Param(1)
             
             LVarValue = FasStack.pop       ' GetValue from Stack
             
@@ -862,9 +925,9 @@ On Error GoTo InterpretStream_rek_err
 
         'Zero _FAS
          Case &H5E 'clear Local Var16
-            param.add .int16         ' GetVarIdx
-            DisASM = "clear L_" & LVars(param(1))
-            LVars(param(1)) = "<Deleted LVar>"   'Set Value to Zero
+            Param.add make_INT(.int16, 2)         ' GetVarIdx
+            DisASM = "clear L_" & LVars(Param(1))
+            LVars(Param(1)) = "<Deleted LVar>"   'Set Value to Zero
          
 
 '=== BinValues ops ===
@@ -872,8 +935,8 @@ On Error GoTo InterpretStream_rek_err
          'Get
          Case &H3  'Push GVvar16 on stack
            DisASM_short = "VALUE"
-           param.add .int16  'String?
-           tmp = MVars(param(1))
+           Param.add make_INT(.int16, 2)  'String?
+           tmp = MVars(Param(1))
            asValue tmp
            FasStack.push make_ITEM(tmp)
            
@@ -883,9 +946,9 @@ On Error GoTo InterpretStream_rek_err
 
          Case &H4  '         'FSL
             'goes together with 2e
-             param.add .int8
-             param.add .int8
-             tmp = "stream " & param(2) & " [" & param(1) & "]"
+             Param.add make_INT(.int8, 1)
+             Param.add make_INT(.int8, 1)
+             tmp = "stream " & Param(2) & " [" & Param(1) & "]"
              DisASM = "push " & tmp 'lnode*
              'Debug.Assert param(1) = 1 'listselector or rewinder - seems to be always 1
              'Debug.Assert (param(2) = 0) Or (param(2) = 1) Or (param(2) = 2) Or (param(2) = 4)
@@ -894,93 +957,89 @@ On Error GoTo InterpretStream_rek_err
              
              
          'setq
-         Case &H6: ' Pop into GVar16
+         Case &H6, &H1A, &H1B: ' Pop into GVar16
          
-            DisASM_short = "setq"
+            If FasCmdline.Commando = &H6 Then
+               DisASM_short = "setq"
+               
+            ElseIf FasCmdline.Commando = &H1A Then
+               DisASM_short = "FSL_defun"             'setq_FSL_func
+               
+            ElseIf FasCmdline.Commando = &H1B Then
+               DisASM_short = "FSL_setq"              'setq_FSL_Var
+               
+            End If
+            
             Description = "Push assignment: param#1 = last stack item"
 
-            param.add .int16
+            Param.add make_INT(.int16, 2)
             
             Dim AssignToSymbol
-            Set AssignToSymbol = MVars(param(1))
+            Set AssignToSymbol = MVars(Param(1))
             
             asValue AssignToSymbol
             
             Dim Expression
-            Set Expression = FasStack.pop
+            Set Expression = FasStack.Current
+            FasStack.popIntoVoid
+            
             
             
             Debug.Assert TypeOf AssignToSymbol Is T_SYM
             '...with exploring intent. Just  for finding special cases (or errors)
             
-
-'            Dim isDefun As Boolean
-'            isDefun = TypeOf Expression Is T_USUBR
-'
-'            isDefun = False
-'
-'            If isDefun Then
-'               Dim Udefun As T_USUBR
-'               Set Udefun = Expression
-'
-'             ' Check is FunctionName Matches
-'               Debug.Assert Udefun.Name = AssignToSymbol
-'               'FasCmdline.Interpreted = ";;; defun " & AssignToSymbol & " @" & OffToStr(Udefun.Start)
-'
-'
-'             ' Skip Push <FuncName>
-'               Debug.Assert .int8 = &H9
-'               Debug.Assert AssignToSymbol = MVars(.int16)
-'
-'             ' Skip Pop
-'               Debug.Assert .int8 = &HA
-'
-'
-'             ' Decompile Recurive
-'               RaiseEvent InterpretingProgress(FasCmdline)
-'
-'               m_MVar = 1              ' Set Modul to 1
-'
-'               FasFunctionData.Position = Udefun.Start
-'               InterpretStream_rek FasFunctionData, Target
-'
-'               m_MVar = 0              ' Set Modul to 0
-'
-'               GoTo noOutput:
-'
-'
-'            Else
             
                '-- Make setq --
    '            On Error Resume Next
                DisASM = AssignToSymbol & " = " & Expression.toText
    '            DisASM = Join(tmp) & " = " & DisASM
    
+   
+       ' #Patch: Setq_PUSH-POP-supress  'Echo' after setq
+         If opt_patches Then
+             ' consume next  pu_item <FuncName>
+               Dim pu_item, pu_item_Idx
+               pu_item = .int8
+               pu_item_Idx = .int16
+               
+               If (pu_item <> 9) Or (pu_item_Idx <> Param(1)) Then
+               ' Normal defun is done with h09_puitem <idx>; h06_Setq <idx>
+               ' ErrorHandler is done with h03_puitem <idx>; h06_Setq <idx>
+               '  Stop
+                 .Move -1 - 2
+               Else
+                  FasStack.push "<dummy>"
+               End If
+                 
+            End If
+   
           ' defun-Handler#2b: for possible defun
             If Not FunctionToDecompile Is Nothing Then
                FunctionToDecompile.isLambda = False 'Not really need since 'false' is the default value
                
-             ' Just checking - if the name of function matche
+             ' Just checking - if the name of function match
                Debug.Assert FunctionToDecompile.FuncName = AssignToSymbol
                
              ' That is no real setq - suppress output to make space for the defun
              ' that will follow
                tmp3 = ";;; (" & AssignToSymbol & " @" & OffToStr(FunctionToDecompile.Startoffset)
                
-             ' consume next  pu_item <FuncName>
-               Debug.Assert .int8 = 9 'pu_item
-               Debug.Assert .int16 = param(1)
-               
-               FasStack.push "<dummy>"
-               
                
             Else
-               tmp3 = TokenFull("setq", AssignToSymbol, Expression.toText)
+               tmp3 = TokenFull(DisASM_short, AssignToSymbol, Expression.toText)
             End If
    
    
                Set tmp = New E_SETQ
                tmp.value = tmp3
+               
+               If TypeOf Expression Is E_ITEM Then
+                  If Expression.NoOutput Then
+                     tmp = ""
+                     DisASM = ";;; " & DisASM
+                  End If
+               End If
+
                
    '            On Error GoTo InterpretStream_rek_err
                
@@ -996,27 +1055,29 @@ On Error GoTo InterpretStream_rek_err
 '            End If
             
             
-         'setq_FSL_func"
-         Case &H1A ' Pop into GVar16
-            param.add .int16
-            DisASM = MVars(param(1)) & " " & FasStack.pop
+'         'setq_FSL_func"
+'         Case &H1A ' Pop into GVar16
+'            DisASM_short = "FSL_defun"
+'            param.add make_INT(.int16, 2)
+'            DisASM = MVars(param(1)) & " " & FasStack.pop
+'
+'            FasCmdline.Interpreted = TokenFull("FSL_defun", DisASM)
+'
+'
+'         'setq_FSL_Var
+'         Case &H1B ' Pop into GVar16
+'            DisASM_short = "FSL_setq"
+'            param.add make_INT(.int16, 2)
+'            DisASM = MVars(param(1)) & " " & FasStack.pop
+'
+'            FasCmdline.Interpreted = TokenFull("FSL_setq", DisASM)
+'
             
-            FasCmdline.Interpreted = TokenFull("setq_FSL_func", DisASM)
-            
-            
-         'setq_FSL
-         Case &H1B ' Pop into GVar16
-            param.add .int16
-            DisASM = MVars(param(1)) & " " & FasStack.pop
-         
-            FasCmdline.Interpreted = TokenFull("FSL_setq", DisASM)
-            
-            
-         'Copy Element
+        'Copy Element
          Case &H7:
-            param.add .int8 'List(>index<)
-            param.add .int8 'List(>index<)
-            DisASM = "Copy Element " & param(1) & " to " & param(2) & " ListBase=[61A49790]"
+            Param.add make_INT(.int8, 1) 'List(>index<)
+            Param.add make_INT(.int8, 1) 'List(>index<)
+            DisASM = "Copy Element " & Param(1) & " to " & Param(2) & " ListBase=[61A49790]"
             
             'Djamana: Attention I just added this to make the stack more nice
             '         but there maybe no real coderelated reason for that - so maybe remove it.
@@ -1025,9 +1086,9 @@ On Error GoTo InterpretStream_rek_err
   
   
          Case &H10 'List Step
-            param.add .int8 'steps forward or backward in a list ?
-            param.add .int8
-            DisASM = "Push??? LVar " & param(1) & ", " & param(2)
+            Param.add make_INT(.int8, 1) 'steps forward or backward in a list ?
+            Param.add make_INT(.int8, 1)
+            DisASM = "Push??? LVar " & Param(1) & ", " & Param(2)
             FasStack.push DisASM
   
          
@@ -1035,13 +1096,13 @@ On Error GoTo InterpretStream_rek_err
             DisASM_short = "pu_Item"
             
             'Used for Lists and Strings
-            param.add .int16 '.int16Sig
+            Param.add make_INT(.int16, 2) '.int16Sig
             
             On Error Resume Next
-            Set tmp = MVars(param(1))
+            Set tmp = MVars(Param(1))
             If Err Then
                Err.Clear
-               tmp = MVars(param(1))
+               tmp = MVars(Param(1))
                
             Else
             
@@ -1054,7 +1115,7 @@ On Error GoTo InterpretStream_rek_err
             On Error GoTo InterpretStream_rek_err:
             
             DisASM = "push " & tmp
-            Description = "push item #" & param(1) & " from GVar => Stack"
+            Description = "push item #" & Param(1) & " from GVar => Stack"
          
           ' defun-Handler#1:  Memorise function to decompile for next stack output
             Dim isDefun As Boolean
@@ -1067,17 +1128,11 @@ On Error GoTo InterpretStream_rek_err
              ' Clear FunctionText
              ' ^- maybe move this to 'defun-Handler#2a:
                Set tmp = make_ITEM("")
+               
+            
             End If
             
             
-'            'FIX:Format Lists correctly with '
-'             If isList(tmp) Then
-'                 tmp = "'" & tmp
-'             Else
-'                 'put strings into Quotes
-'                 tmp = "'" & tmp & "'"
-'             End If
-         
             FasStack.push tmp
             
             
@@ -1089,6 +1144,8 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "pop dummy (decrease stack)" & vbCrLf  ' "sub-4"
             FasCmdline.Interpreted = FasStack.pop
             
+            Debug.Assert FasStack.esp = 0
+            
          Case &HB: 'Stack Duplicate Element
             DisASM_short = "Pu_Last"
             Description = "Push last element again on stack"
@@ -1097,166 +1154,168 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "Push " & FasStack.Current & "[Last element again]"
               
          Case &HC 'Push Gvar16 onStack
-            param.add .int16 '.int16Sig
-            FasStack.push MVars(param(1))
+            Param.add make_INT(.int16, 2) '.int16Sig
+            FasStack.push MVars(Param(1))
             DisASM = "FSL_Push " & FasStack.Current
             
             
+  '==== Branches ===
+            
          Case &HD, &H3C ' Branch_16 if false
          ' identical code in vl.arx (not point same points in cmd-switch table)
-         '     0d -> 0f_jmp only used in fsl
+         '     0d -> 0f_jmp only used in fsl and fas2
          '     0f -> 3C_with_jump_backward
-            param.add .int16 'old
-            DisASM = "if (" & FasStack.pop & "==0) then jmp to " & OffToStr(param(1) + .Position)
+         '0d - Somehow use to jump over errorhandler
+
+            DisASM_short = "BrIfF16"
+
+          ' param #1 - branchDelta16
+            Dim branchDelta
+            branchDelta = .int16
+            Param.add make_INT(branchDelta, 2)
+
+          ' param #2 - Condition (from stack)
+            Dim Condition
+            Condition = FasStack.pop
+
+            Dim branchTarget&
+            branchTarget = .Position + branchDelta
+
+            DisASM = "if (" & Condition & "==0) then jmp to " & OffToStr(branchTarget)
             FasStack.push "'Retval' of IF"
+
+            InterpretStream_output DisASM, DisASM_short, Description
             
-            FasCmdline.Disassembled = GetIndent(level) & DisASM
-            RaiseEvent InterpretingProgress(FasCmdline)
-            
-            If param(1) > 0 Then
-               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1
+
+            If branchDelta > 0 Then
+                           dummy = FasStack.pop
+               tmp = Brancher.DoProgn(branchTarget, level + 1, 0)
+
+               FasCmdline.Interpreted = TokenFull("Cond? " & Condition, tmp)
+               'InterpretStream_rek FileStream, Target, branchTarget, level + 1, -1
 '               If .int8 = &H1A Then 'is next cmd setq?
 '                  qw
-'                  param.Add .int16
+'                  param.add make_INT(.int16, 2)
 '                  disasm = "FSL_setq " & MVars(param(1)) & " " & FasStack.pop
 '
 '               Else
 '                  .Move -1
                  'FasStack.pop
-                 GoTo noOutput
+'                 GoTo NoOutput
 '               End If
-               
+
             Else
                FasStack.popIntoVoid
-               GoTo noOutput
+               GoTo NoOutput
             End If
 
          
          Case &HE, &H3D ' Branch_16 if true
          ' identical code in vl.arx (not point same points in cmd-switch table)
-            param.add .int16
+         
+                   ' param #1 - branchDelta16
+            'Dim branchDelta
+            branchDelta = .int16
+            Param.add make_INT(branchDelta, 2)
+
+          ' param #2 - Condition (from stack)
+            'Dim Condition
+            Condition = FasStack.Current
             
-            DisASM = "if (" & FasStack.Current & ") then pop else jmp to " & OffToStr(param(1) + .Position)
+            'Dim branchTarget&
+            branchTarget = .Position + branchDelta
             
-            FasCmdline.Disassembled = GetIndent(level) & DisASM
-            RaiseEvent InterpretingProgress(FasCmdline)
+            '3d - seen in fsl
+            DisASM_short = "BrIfT16" & IIf(FasCmdline.Commando = &HE, "_2", "")
             
-            InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1
+            DisASM = "if (" & Condition & ") then pop else jmp to " & OffToStr(branchTarget)
+            
+            InterpretStream_output DisASM, DisASM_short, Description
+
+            tmp = Brancher.DoProgn(branchTarget, level + 1, 1)
+            'InterpretStream_rek FileStream, Target, branchTarget, level + 1, -1
+            
+            FasStack.popIntoVoid
+            FasCmdline.Interpreted = TokenFull("Cond2? " & Condition, tmp)
+            
         '    If level = 0 Then FasStack.push "'Retval' of IF"
         
 '            qw
-            GoTo noOutput
+'            GoTo NoOutput
          
          
-         Case &H67: 'Branch_32 is true
+         Case &H67: 'Branch_32 if true
+         ' identical code in vl.arx (not point same points in cmd-switch table)
+         '     0d -> 0f_jmp only used in fsl and fas2
+         '     0f -> 3C_with_jump_backward
+                   
+           DisASM_short = "BrIfT"
          'normal if then else 57 used for
          '( while testexpr [expr])
          '( repeat int [expr])
          '( foreach name lst [expr]) and
          '( if testexpr thenexpr elseexpr)
             
-            param.add .int32Sig
-            tmp = FasStack.pop
-         
-            With FileStream
-               .StorePos
-               
-               .Move param(1) - (1 + 4) ' int8_Cmd + int32sig_Param
-               
-               Dim Goto_Addr&
-               isGoto_0x57 Goto_Addr, FileStream
-               
-               
-            '... while  -> when there's at $p1-(1+4) some Goto(&H57) that jumps backwards
-               Dim isWhile As Boolean
-               isWhile = Goto_Addr < 0
-               
-               Dim isElse As Boolean
-               isElse = Goto_Addr = 0
-               
-               
-               ' is it Repeat?
-                Dim isRepeat As Boolean
-                isRepeat = Last_FasCmdline.Commando = &H4B '(<= a b)
-               
-               
-               Dim keyword
-               
-               If isRepeat Then
-                  keyword = "repeat "
-                  
-               ElseIf isWhile Then
-                  keyword = "while "
-                  
-               ElseIf isElse Then
-                  keyword = "else "
-               
-               ElseIf isClearArgsNVars_0x19(FileStream) Then
-                  keyword = "for each "
-
-               Else
-                  keyword = "if "
-               End If
-               
-               
-               .RestorePos
-            End With
             
-               DisASM = keyword & "(" & tmp & ")... else goto " & OffToStr(.Position + param(1))  ' If [edi]==0
+            Dim isBrIfT_67 As Boolean
+            isBrIfT_67 = FasCmdline.Commando = &H67
+            
+            If isBrIfT_67 Then
+            
+             ' param #1 - Jump32
+               branchDelta = make_INT(.int32Sig, 4)
+               DisASM_short = DisASM_short & "32"
+            Else
+               branchDelta = make_INT(.int16, 2)
+               DisASM_short = DisASM_short & "16"
+            End If
+            
+            Param.add branchDelta
             
             
-            'FasCmdline.Interpreted = tmp
+            'Dim Condition
+            Condition = FasStack.pop
+            
+            'Dim branchTarget&
+            branchTarget = .Position + branchDelta
+            
+               'Dim Keyword
+               Keyword = Brancher.GetKeyWord(Last_FasCmdline, FasCmdline)
+               
+              'VlaxFor Patch
+               If Brancher.isVlaxFor Then Condition = Brancher.VlaxFor_item
+               
+            
+               DisASM = Keyword & " (" & Condition & ") pop else goto " & OffToStr(branchTarget)  ' If [edi]==0
+            
+            
+            'FasCmdline.Interpreted = condition
             'FasStack.pop
-            'FasStack.push tmp
+            'FasStack.push condition
             
+            Dim Branch_Firstpart
             FasCmdline.Disassembled = GetIndent(level) & DisASM
-            tmp2 = TokenOpen(keyword, level) & tmp
-            If keyword <> "if " Then
-               FasCmdline.Interpreted = tmp2
-            Else
-               'FasStack.push tmp2
-            End If
+            Branch_Firstpart = TokenOpen(Keyword, level) & Condition
+            
+            'If Keyword <> "if" Then
+            '   FasCmdline.Interpreted = Branch_Firstpart
+            'Else
+            '   'FasStack.push Branch_Firstpart
+            'End If
 
-            RaiseEvent InterpretingProgress(FasCmdline)
-            
-            If isRepeat Then
-               .Move 1 '<-for repeat ; Skip some 0x1 Push nil
-            End If
-            
-            
-            If keyword = "if " Then
-               Dim ThenPart
-               ThenPart = DoProgn(FileStream, Target, .Position + param(1) - 1, level)
-            
-               Debug.Assert Last_FasCmdline.Commando = &H57
-               
-               Dim Else_EndPos
-               Else_EndPos = .Position + Last_FasCmdline.Parameters(1)
+            InterpretStream_output DisASM, DisASM_short, Description
 
-             ' Make if Statement
-               Dim ElsePart
-               ElsePart = DoProgn(FileStream, Target, Else_EndPos, level)
-               
-               
-               FasStack.push tmp2 & " " & vbCrLf & _
-                              ThenPart & " " & vbCrLf & _
-                              ElsePart & vbCrLf & _
-                           TokenClose
-               
             
-            Else
+           ' If Brancher.isRepeat Then
+           '    .Move 1 '<-for repeat ; Skip some 0x1 Push nil
+           ' End If
             
-               
-             ' process  'Then' Branch
-               InterpretStream_rek FileStream, Target, .Position + param(1) - 1, level + 1, IIf(isRepeat, -1, 0)
-   
-   
-             ' Close Branch/Loop sequence block
-               'FasCmdline.Interpreted = FasCmdline.Interpreted & ")"
-               FasStack.Current = TokenClose("keyword")
+            Brancher.Decompile Last_FasCmdline, FasCmdline, Branch_Firstpart
             
 
-            End If
+
+            
+ 
 '          ' is it normal_If?
 '            If Last_FasCmdline.Commando = &H57 Then 'Note: &H57 is Goto xxx
 '             ' 'else' branch of if
@@ -1289,118 +1348,327 @@ On Error GoTo InterpretStream_rek_err
         
 '            FasCmdline.Interpreted = FasStack.pop & ")"
  '           disasm = GetIndent(level)  & "END IF"
-            GoTo noOutput
+            GoTo NoOutput
             
          Case &H69 'Branch32
-            'seldom use
-            param.add .int32Sig
-            'pop condition always
-            DisASM = "If (" & FasStack.pop & ") ... Else Goto " & OffToStr(.Position + param(1))
-         
-         Case &H68 'Cond
-            param.add .int32Sig
-            tmp = OffToStr(.Position + param(1))
-            DisASM = "Cond If (" & FasStack.Current & ") Goto " & tmp & " Else .pop"
+            DisASM_short = "Br2IfT32"
             
-'            Label_Push CStr(tmp), "cond"
-            FasCmdline.Disassembled = GetIndent(level) & DisASM
-            
-            'FasStack.push "(cond " & FasStack.Current & " ("
-            
-            If level = 0 Then FasCmdline.Interpreted = TokenOpen("Cond")
-           
-            Dim isLastCond As Boolean
-            .StorePos
-               tmp = .int16
-               isLastCond = (tmp = &H5701) '01_Push <nil>; 57_Goto
-            .RestorePos
-           
-           
-            RaiseEvent InterpretingProgress(FasCmdline)
-
-            If Not isLastCond Then
-   
-               InterpretStream_rek FileStream, _
-                     Target, .Position + param(1) + 1, _
-                     level + 1, 0
-                     
-                     
-               asd
-               FasCmdline.Interpreted = FasStack.pop & _
-                           IIf(level = 0, _
-                               " )", _
-                               "")
-
+          ' param #1 - Jump32
+          ' Dim branchDelta
+            branchDelta = make_INT(.int32Sig, 4)
+            Param.add branchDelta
                
-
+           'Dim Condition
+            Condition = FasStack.pop
+          
+           'Dim branchTarget&
+            branchTarget = .Position + branchDelta
+               
+               
+            Param.add make_INT(.int32Sig, 4)
+            'pop condition always
+            DisASM = "If (" & Condition & ") ... else goto " & OffToStr(branchTarget)
+         
+            'seldom used - find out more
+            Stop
+         
+         
+         Case &H68, &H6A 'Cond
+         
+            Dim isAND_6A As Boolean
+            isAND_6A = FasCmdline.Commando = &H6A
+         
+          ' param #1 - branchDelta32
+            branchDelta = .int32Sig
+            
+          ' param #2 - Condition (from stack)
+            Param.add make_INT(branchDelta, 4)
+            branchTarget = .Position + Param(1)
+            
+            
+            If isAND_6A Then
+               DisASM_short = "AND"
+               DisASM = "and_If (" & FasStack.Current & ") .pop Else goto " & OffToStr(branchTarget)
 
             Else
-             
-               .Move 1 + 1 + 4 'Skip 01_Push <nil>; 57_Goto
-
+               DisASM_short = "CND/OR"
+               DisASM = "cond/or If (" & FasStack.Current & ") Goto " & OffToStr(branchTarget) & " Else .pop"
             End If
-     
-            asd
             
+'            Label_Push CStr(branchTarget), DisASM_short
+               InterpretStream_output DisASM, DisASM_short, Description
+             
+            If isAND_6A Then
+               '=== AND ===
+               '   $14E   3  12   4 VALUE     Push value of [T]
+               '   $151  6A  17   4 AND       and_If (T) .pop Else goto $167
+               '
+               '   $156   3  11   4 VALUE     Push value of [B]
+               '   $159  6A  9    4 AND       and_If (B) .pop Else goto $167
+               '
+               '   $15E   3  14   4 VALUE     Push value of [C]
+               '   $161  6A  1    4 AND       and_If (C) .pop Else goto $167
+               '
+               '   $166   2       4           Push T
+               
+               
+               
+               'Brancher.HandleAnd FasCmdline
+               ' Create and Get itemCounter
+                 Static And_ItemsOnStack As New Collection
+                 Dim And_ItemsCount
+                 Set And_ItemsCount = CollectionQuery(And_ItemsOnStack, CStr(branchTarget))
+                 
+                 
+               ' Increase Item Counter
+                 And_ItemsCount.value = And_ItemsCount + 1
+                 
+               ' Check for Terminator
+                 Dim isLastAnd
+                 isLastAnd = IsNextCommand(FileStream, &H2) 'Push T
+                 isLastAnd = isLastAnd And (branchDelta = 1)
+                 '6A  1    AND       and_If (NIL)
+                 '02                  Push T
+                 
+                 If isLastAnd Then
+                  
+                     Dim And_Items
+                     And_Items = FasStack.popArray(And_ItemsCount)
+                     And_ItemsCount.value = 0
+                     
+                     Dim and_Full
+                     and_Full = TokenFull("and", And_Items)
+                     FasStack.push make_ITEM(and_Full)
+                     
+                     'Seek over Terminator
+                  '   $166   2       4           Push T
+                     
+                     tmp = .int8
+                     Debug.Assert tmp = 2 ' Push T
+                 End If
+
+               
+            ElseIf Brancher.IsOr_Check(branchTarget) Then
+                ' === OR ===
+                
+                  ';item #1/3
+                  '   $12B   3  15   1 VALUE     Push value of [A]
+                  '   $12E  68  15   1 CND/OR    cond/or If (A) Goto $142 Else .pop
+                  '
+                  ';item #2/3
+                  '   $133   1       2 ld NIL    Push nil
+                  '   $134  68  9    2 CND/OR    cond/or If (NIL) Goto $142 Else .pop
+                  '
+                  ';item #3/3 -Last item
+                  '   $139   3  14   3 VALUE     Push value of [C]
+                  '   $13C  68  1    3 CND/OR    cond/or If (C) Goto $142 Else .pop
+                  '
+                  ';Terminator
+                  '   $141   1       4 ld NIL    Push nil
+                  '   $142  6A  1    4 AND       and_If (NIL) .pop Else goto $148
+                  '   $147   2       4           Push T
+                  '
+                  '
+                  '   $148  35  1 13 4 ld_USUBR  PRINC 1 Params are above...
+                  '   $14D   A       3 Pop       pop dummy (decrease stack)
+                
+                
+               ' Create and Get itemCounter
+                 Static Or_ItemsOnStack As New Collection
+                 Dim Or_ItemsCount
+                 Set Or_ItemsCount = CollectionQuery(Or_ItemsOnStack, CStr(branchTarget))
+                 
+                 
+               ' Increase Item Counter
+                 Or_ItemsCount.value = Or_ItemsCount + 1
+                 
+               ' Check for Terminator
+                 Dim isLastOR
+                 isLastOR = IsNextCommand(FileStream, &H1) 'Push nil
+                 isLastOR = isLastOR And (branchDelta = 1)
+                 '6A  1    AND       and_If (NIL)
+                 '02                  Push T
+                 
+                 If isLastOR Then
+                  
+                     Dim Or_Items
+                     Or_Items = FasStack.popArray(Or_ItemsCount)
+                     Or_ItemsCount.value = 0
+                     
+                     Dim Or_Full
+                     Or_Full = TokenFull("or", Or_Items)
+                     FasStack.push make_ITEM(Or_Full)
+                     
+                     'Seek over Terminator
+                  '   $141   1       4 ld NIL    Push nil
+                  '   $142  6A  1    4 AND       and_If (NIL) .pop Else goto $148
+                  '   $147   2       4           Push T
+                     
+                     
+                     Debug.Assert .int8 = 1
+                     Debug.Assert .int8 = &H6A: Debug.Assert .int32 = &H1
+                     Debug.Assert .int8 = 2
+                 End If
+
+
+                  
+            Else
+               
+               InterpretStream_output DisASM, DisASM_short, Description
             
-' is it normal_If?
-'            If Last_FasCmdline.Commando = &H57 Then
-'               FasCmdline.Interpreted = "normal cond"
-'            Else
-'               FasCmdline.Interpreted = "it's OR skip next 6 bytes -> " & .Position + 6
-'            End If
+             ' === Cond ===
+               Brancher.HandleCond FasCmdline ', Condition
+
+               GoTo NoOutput
+            End If
+            
+            'Cond No Brancher
+'
+'
+'                     Dim isLastCond As Boolean
+'                     Dim hasRetVal As Boolean
+'                     isLastCond = Brancher.Brancher_Cond.isCond_Last(hasRetVal)
+'
+'
+'                   ' that's important to embalence the stack
+'                   ' in case of problems use 'FasStack.Current'
+'                   ' That might make the stack getting bigger(in case of cond with retval)
+'                     If hasRetVal Then
+'                        Condition = FasStack.pop
+'                     Else
+'                        Condition = FasStack.Current
+'                     End If
+'
+'
+'                   ' Check if hasRetVal stays at the same value during one cond
+'                     Static hasRetVal_Last
+'                     If IsEmpty(hasRetVal_Last) = False Then _
+'                        Debug.Assert hasRetVal = hasRetVal_Last
+'
+'                     hasRetVal_Last = hasRetVal
+'
+'                   ' Clear value on last cond
+'                     If isLastCond Then hasRetVal_Last = Empty
+'
+'
+'      '               FasStack.Current = make_ITEM(TokenOpen("cond") & Condition)
+'
+'                  End If ' isCond
+'=================================================================
+   
+   '               If Not isLastCond Then
+   '
+   '                  InterpretStream_rek FileStream, _
+   '                        Target, .Position + param(1) + 1, _
+   '                        level + 1, 0
+   '
+   '
+   '                  asd
+   '                  FasCmdline.Interpreted = FasStack.pop & _
+   '                              IIf(level = 0, _
+   '                                  " )", _
+   '                                  "")
+   '
+   '               Else
+   '
+   '                  .Move 1 + 1 + 4 'Skip 01_Push <nil>; 57_Goto
+   '
+   '               End If
+           
         
-'            GoTo noOutput
+
 
          Case &H6A: 'AND
-            param.add .int32Sig
-            tmp = OffToStr(.Position + param(1))
-            DisASM = "and_If (" & FasStack.Current & ") .pop Else goto " & tmp
-'            FasCmdline.Disassembled = GetIndent(level) &  disasm
-'            RaiseEvent InterpretingProgress(FasCmdline)
+            
+            Param.add make_INT(.int32Sig, 4)
+            branchTarget = .Position + Param(1)
+            
+            DisASM_short = "AND"
+            DisASM = "and_If (" & FasStack.Current & ") .pop Else goto " & OffToStr(branchTarget)
+            
+            
+            InterpretStream_output DisASM, DisASM_short, Description
 
-            Label_Push CStr(tmp), "and"
-'            If ANDDest = tmp Then
+            'Label_Push CStr(tmp), "and"
+'            If ANDDest = branchTarget Then
 '              'Next/inner andif
-'               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1, tmp, InterpretStream_AND_6A_Helper
+'               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1, branchTarget, InterpretStream_AND_6A_Helper
 '               InterpretStream_AND_6A_Helper = InterpretStream_AND_6A_Helper + 1
 '            Else
 '              'First/ outer andif
 '               InterpretStream_AND_6A_Helper = 1
-'               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1, tmp, InterpretStream_AND_6A_Helper
+'               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1, -1, branchTarget, InterpretStream_AND_6A_Helper
 '             '  FasStack.ESP = FasStack.ESP + InterpretStream_AND_6A_Helper - 1
 '             '  FasStack.push "(and " & Join(FasStack.popArray(InterpretStream_AND_6A_Helper)) & ")"
 '               InterpretStream_AND_6A_Helper = 1
 ''               disasm = GetIndent(level) &  "-------"
 '            End If
-'            GoTo noOutput
+            GoTo NoOutput
             
          Case &HF 'fsl - together with 0d_if
-            param.add .int16
-            DisASM = "(FSL 0xd_if related)  jump to " & OffToStr(param(1) + .Position)
-            FasCmdline.Disassembled = GetIndent(level) & DisASM
-            RaiseEvent InterpretingProgress(FasCmdline)
+            Param.add make_INT(.int16, 2)
+            DisASM = "(FSL 0xd_if related)  jump to " & OffToStr(Param(1) + .Position)
+            InterpretStream_output DisASM, DisASM_short, Description
             
-            If param(1) > 0 Then
-               InterpretStream_rek FileStream, Target, .Position + param(1), level + 1
+            If Param(1) > 0 Then
+               InterpretStream_rek FileStream, Target, .Position + Param(1), level + 1
             End If
         
             'GoTo noOutput
             
             
          Case &H57 'Goto 32
-            param.add .int32Sig
-            DisASM = "goto " & OffToStr(param(1) + .Position)
-            'disasm = "jump [far] over " & param(1) & " bytes to " & param(1) + .Position
-'            If (param(1) > 0) And (level > 0) Then
-'               disasm = "ELSE " & disasm
-'               StopAtOffset = StopAtOffset + param(1)
-'            End If
+            DisASM_short = "GOTO"
+            
+            Dim GotoTarget
+            Set GotoTarget = make_INT(.int32Sig, 4)
+            
+            Param.add GotoTarget
+            
+            GotoTarget = GotoTarget + .Position
+            DisASM = "goto " & OffToStr(GotoTarget)
+            
+            
+         ' Defun Error Handler
+            Dim IsErrorHandler As Boolean
+            IsErrorHandler = IsNextCommand(FileStream, &H14) 'Defun
+            
+            If IsErrorHandler Then
+            
+             ' Output Line
+               DisASM = DisASM & " Nested defun..."
+               InterpretStream_output DisASM, DisASM_short, Description
+
+               
+               Dim ErrorHandler
+               ErrorHandler = Brancher.DoBlock(GotoTarget, level + 2)
+              
+             ' skip error Function load
+'    $43   09  0025  pu_Item   push <Func> *ERROR* Modul:_FAS0, Offs: $19 [25]
+'    $46   06  0020  setq      *ERROR* =
+'    $49
+               Dim DefunStart
+               DefunStart = .Position + (1 + 2) + (1 + 2)
+               Debug.Assert IsNextCommand(FileStream, &H9)  'Push Item
+               Brancher.DoBlock DefunStart, level + 1, 1
+               'Set FunctionToDecompile = Nothing
+               FasStack.popIntoVoid
+               
+               
+             ' set output
+               FasCmdline.Interpreted = Join(ErrorHandler, vbCrLf)
+               
+               'GoTo NoOutput
+            End If
+
+            
+            
+
 
             
          Case &H21
-            param.add .int16
-            DisASM = "end defun ;cleanup " & param(1) & " vars (" & param(1) & " " & Join(FasStack.popArray(param(1) + 2), ",") & ")"
+            Param.add make_INT(.int16, 2)
+            DisASM = "end defun ;cleanup " & Param(1) & " vars (" & Param(1) & " " & Join(FasStack.popArray(Param(1) + 2), ",") & ")"
             'select case param1 '[61A49788]
             'case 1..10    5,6 invalid cmd  2 exit
 '         Case &H22
@@ -1445,75 +1713,129 @@ On Error GoTo InterpretStream_rek_err
             'pop, reset varbasepionter and something else...
  '           Set m_MVar = m_MVars(1)
  
-         Case &H34
-            '? DisASM_short = "ld_USUBR"
-            param.add .int8 ' Func Arguments
-            param.add .int8 ' Flags
-            FasStack.push FasStack.pop & " " & Join(FasStack.popArray(param(1)))
-            DisASM = FasStack.Current & ", " & _
-                                         CBool(param(2) And 1) & ", " & _
-                                         CBool(param(2) \ 4 And 1) & ", " & _
-                                         CBool(param(2) \ 2 And 1) & ", "
-            'if
-            
-            
+'         Case &H34
+'            DisASM_short = "AND"
+'            param.add make_INT(.int8, 1) ' Func Arguments
+'            Dim Flags
+'                Flags = .int8   'used bits:
+'                                  '           bit_0, cleared -> IsACAD Function (for ex C:INIT )
+'                                  '           bit_2, set     -> Invalid Function
+'                                  '           bit_1
+'            param.add make_INT(Flags, 1) ' Flags
+'
+'            FasStack.push FasStack.pop & " " & Join(FasStack.popArray(param(1)))
+'
+'          ' Show last 3 bit's
+'            Debug.Assert 0 = (Flags And &HFC&) 'Ensure others are cleared
+'            DisASM = FasStack.Current & ", " & _
+'                                         boolToText(Flags And 1) & ", " & _
+'                                         boolToText(Flags \ 4 And 1) & ", " & _
+'                                         boolToText(Flags \ 2 And 1) & ", "
+         
          'USUBR
-         Case &H35, &H51:
+         Case &H34, &H35, &H51:
+                  
+                  Dim IsH34_EVAL As Boolean
+                  IsH34_EVAL = FasCmdline.Commando = &H34
                   
                   Dim IsH35 As Boolean
                   IsH35 = FasCmdline.Commando = &H35
                   
+                  Dim IsH51_Func As Boolean
+                  IsH51_Func = FasCmdline.Commando = &H51
+                  
                                                       
-                  DisASM_short = IIf(IsH35, "ld_USUBR", "FUNC")
+                  DisASM_short = Switch( _
+                     IsH34_EVAL, "EVAL", _
+                     IsH35, "ld_USUBR", _
+                     IsH51_Func, "FUNC", _
+ _
+                     True, "_ERROR" _
+                     )
+                     
                   Description = "Load User subroutine from stream"
                   
+                ' Param #1 - ParamAbove
                   Dim ParamAbove
-                  ParamAbove = .int8 'Params are above (stored in [ebp+c])
-                  param.add ParamAbove
-                  param.add .int16 'GVarIdx
+                  Set ParamAbove = make_INT(.int8, 1) 'Params are above (stored in [ebp+c])
+                  Param.add ParamAbove
                   
+                ' Param #2 - GVarIdx
+                  If IsH35 Or IsH51_Func Then
+                     Param.add make_INT(.int16, 2) 'GVarIdx
+                  End If
+                  
+                ' Param #3 - Flags
                   Dim Flags
                   Flags = .int8   'used bits:
                                   '           bit_0, cleared -> IsACAD Function (for ex C:INIT )
                                   '           bit_2, set     -> Invalid Function
                                   '           bit_1
                                   
+                ' Param #4 - ??? 51Only
                   Dim IsH51Only
-                  If Not IsH35 Then
+                  If IsH51_Func Then
                      IsH51Only = .int8
                      
                    ' Should be 00
                      Debug.Assert IsH51Only = 0
                   End If
                                   
-                  Debug.Assert 0 = (Flags And &HFC&)
-                  Dim b_0_IsWhatever As Boolean
-                  b_0_IsWhatever = Flags And 1
-                  param.add boolToText(b_0_IsWhatever)
-                  Debug.Assert b_0_IsWhatever = True
+                                  
+                  If IsH34_EVAL Then
+                   ' so far it seem that there are all the times all flags set
+                     Debug.Assert Flags = 7
+                     Param.add boolToText(True)
+                     Param.add boolToText(True)
+                     Param.add boolToText(True)
+                     
+                     Debug.Assert Flags = 0
+                     Param.add boolToText(False)
+                     Param.add boolToText(False)
+                     Param.add boolToText(False)
+                     
+                   ' There is no defun name...
+                     Dim DefunName
+                     Set DefunName = make_ITEM("")
+                     
+                   ' ... and always one argument on the top
+                     Expression = FasStack.popArray(ParamAbove + 1)
+ 
+                     
+                  ElseIf IsH35 Or IsH51_Func Then
+                     Debug.Assert 0 = (Flags And &HFC&)
+                     Dim b_0_IsWhatever As Boolean
+                     b_0_IsWhatever = Flags And 1
+                     Param.add boolToText(b_0_IsWhatever)
+   '                  Debug.Assert b_0_IsWhatever = True '(provide 'VILLFLB) (providedp 'stampedApp)
+   
+   '                  Debug.Assert b_0_IsWhatever = False
+   
+                     
+                     Dim b_2_IsIvalidFunc As Boolean
+                     b_2_IsIvalidFunc = Flags And 4
+                     Param.add boolToText(b_2_IsIvalidFunc)
+                     Debug.Assert b_2_IsIvalidFunc = False
+                     
+                     
+                     Dim b_1_IsNotACAD_BuildIn As Boolean
+                     b_1_IsNotACAD_BuildIn = Flags And 2
+                     Param.add boolToText(b_1_IsNotACAD_BuildIn)
+                     'Debug.Assert b_1_IsNotACAD_BuildIn = True
+                     
+   
+                     
+                     'Debug.Assert (Flags = 3) Or (Flags = 1)
+                     
+                     'Debug.Assert .Position <> 2735
+                     
+   '                  On Error Resume Next
                   
-                  Dim b_2_IsIvalidFunc As Boolean
-                  b_2_IsIvalidFunc = Flags And 4
-                  param.add boolToText(b_2_IsIvalidFunc)
-                  Debug.Assert b_2_IsIvalidFunc = False
-                  
-                  
-                  Dim b_1_IsNotACAD_BuildIn As Boolean
-                  b_1_IsNotACAD_BuildIn = Flags And 2
-                  param.add boolToText(b_1_IsNotACAD_BuildIn)
-                  'Debug.Assert b_1_IsNotACAD_BuildIn = True
-                  
-
-                  
-                  'Debug.Assert (Flags = 3) Or (Flags = 1)
-                  
-                  'Debug.Assert .Position <> 2735
-                  
-'                  On Error Resume Next
-                  Dim DefunName
-                  Set DefunName = MVars(param(2))
-                  
-                  Expression = FasStack.popArray(ParamAbove)
+                     Set DefunName = MVars(Param(2))
+                     Expression = FasStack.popArray(ParamAbove)
+                     
+                  End If
+                     
                   
                '-- Fetch Done --
                
@@ -1523,36 +1845,96 @@ On Error GoTo InterpretStream_rek_err
                
                DisASM = IIf(Not (b_1_IsNotACAD_BuildIn), "ACAD-Func ", "") & _
                   DefunName & " " & _
-                  ParamAbove & " Params are above..."
+                  ParamAbove & IIf(IsH34_EVAL, "(+1)", "") & _
+                  " Params are above..."
                   'FasStack.ESP = FasStack.ESP - ParamAbove
                   'FasStack.push "Retval of " & DefunName
 
 
                Select Case DefunName
                
-              '"collect-init"
-              '"collect-next"
-              '"collect-release"
+               Case "vl-ACAD-defun":                  Debug.Assert IsH35
+
+                  'PushThis = TokenFull(DefunName, Expression)
+                  Set PushThis = make_ITEM("", True)
+                  
+               Case "ads-cmd":                        Debug.Assert IsH51_Func
+
+               
+               '  Sample
+               '   $86   9  28         1 pu_Item   push "_.UNDO"
+               '   $89  51  1 27 + - - 1 FUNC      ACAD-Func ads-cmd 1 Params are above...
+               '   $8F   A             0 Pop       pop dummy (decrease stack)                               (Command "_.UNDO")
+               '
+               '   $90   9  26         1 pu_Item   push "_E"
+               '   $93  51  1 27 + - - 1 FUNC      ACAD-Func ads-cmd 1 Params are above...
+               '   $99   A             0 Pop       pop dummy (decrease stack)                               (Command "_E")
+               '
+               '   $9A  35  0 25 + - + 1 ld_USUBR  AI_UNDO_OFF 0 Params are above...
+               '   $9F   A             0 Pop       pop dummy (decrease stack)
+                  
+                  Dim lastGoodPos
+                  lastGoodPos = .Position
+                     Dim commanditems
+                     For commanditems = 0 To &HFFFFFFF
+   
+                        If Not And_( _
+                           .int8 = &HA, _
+                           .int8 _
+                        ) Then Exit For
+                        
+                        Dim CommandIdx
+                        CommandIdx = .int16
+                        
+                        If Not And_( _
+                           .int8 = &H51, _
+                           .int8 = &H1, _
+                           .int16 = Param(2), _
+                           .int8 = Flags, _
+                           .int8 = 0 _
+                        ) Then Exit For
+                        lastGoodPos = .Position
+
+                        
+                        Dim CommandToAdd
+                        Set CommandToAdd = MVars(CommandIdx)
+                        ArrayAdd Expression, CommandToAdd
+                        
+                     Next
+                  .Position = lastGoodPos
+                  
+                  Set PushThis = make_ITEM(TokenFull("Command", Expression))
+
+               Case "collect-init", "collect-next", "collect-release"
+                  Debug.Assert IsH51_Func
+                  
+                  'PushThis = TokenFull(DefunName, Expression)
+                  Set PushThis = make_ITEM("", True)
+                  
+                  If DefunName = "collect-init" Then
+                     Set Brancher.VlaxFor_item = make_ITEM(Expression(1))
+                  End If
+                  
+                  
               
                Case "string-resource"
-                  Debug.Assert Not IsH35
+                  Debug.Assert IsH51_Func
                   
-                  Dim tmpstr1$, tmpstr2$, tmpstr3$
                   
-                  Stop 'check Expression order
-                  tmpstr1 = Expression(0)
-                  tmpstr2 = Expression(1)
-                  tmpstr3 = """" & _
-                     LoadResStringDll(tmpstr1, _
-                                             App.Path & "\" & Split(tmpstr2, """")(1) _
-                           ) & """"
-                  DisASM = tmpstr3 & " '" & DefunName & "' from " & tmpstr2
-                  PushThis = tmpstr3 '& "<-" & tmpstr2
+                  Dim DllName, ResID, ResText
+                  DllName = Expression(1)
+                  ResID = Expression(2)
+                  ResText = Quote( _
+                     LoadResStringDll(ResID, _
+                                             App.Path & "\" & DeQuote(DllName) _
+                           ))
+                  DisASM = ResText & " '" & DefunName & "' from " & DllName
+                  Set PushThis = make_ITEM(ResText) '& "<-" & tmpstr2
                   
                
                Case "_al-bind-alist"
                
-                  Debug.Assert Not IsH35
+                  Debug.Assert IsH51_Func
                   
                 ' Patch Decompiled lines (LispFileData)
                   Dim Defun_Def
@@ -1567,9 +1949,9 @@ On Error GoTo InterpretStream_rek_err
                   End If
 
                   
-                     'FasStack.push "" 'tmpstr1
-                     PushThis = Defun_Def
-                     'FrmMain.LispFileData.push tmpstr1
+                  'FasStack.push "" 'tmpstr1
+                  Set PushThis = make_ITEM(Defun_Def)
+                  'FrmMain.LispFileData.push tmpstr1
                      
                Case Else
                
@@ -1604,109 +1986,131 @@ On Error GoTo InterpretStream_rek_err
                   Else
                      PushThis = TokenFull(DefunName, Expression)
                   End If
-                  
-                  
-                  
-                  If Not b_1_IsNotACAD_BuildIn Then
-                   ' supress  (vl-ACAD-defun C:XXX) output of ACAD_BuildIn Functions
-                     Debug.Print "Wasting: " & DefunName
-                     PushThis = JoinToText(Expression)
-                  Else
-                     PushThis = PushThis
+                  asd
+                  If b_0_IsWhatever = False Then 'Not CBool(m_MVar)
+                     Debug.Print "b_0_IsWhatever: ", PushThis
                   End If
 
+
+                ' Brancher.ForEach_item And _
+
+                'Not really good for fsl
+                  'If Not b_1_IsNotACAD_BuildIn Then
+                   ' supress  (vl-ACAD-defun C:XXX) output of ACAD_BuildIn Functions
+                 '    Debug.Print "Wasting: " & DefunName
+'                '     Stop
+                 '    PushThis = JoinToText(Expression)
+                 ' End If
+                  
+                  Set PushThis = make_ITEM(PushThis)
+                  
               End Select
 
                '--------------------
                                  
                   
-               FasStack.push make_ITEM(PushThis)
+               FasStack.push PushThis
+               
+               
                   
                   
-'Convert to funcptr
-         Case &H51
-              DisASM_short = "FUNC"
-              param.add .int8 'gets overwrite with 45 or 5A
-              param.add .int16  'GVarIdx    ->long(lo)
-              param.add .int16  'test if 00 ->long(hi)
-              '"<- Convert to funcptr and ebx--"
-              
-              Dim FuncName
-              FuncName = MVars(param(2))
-              Select Case FuncName
-              
-               Case "string-resource"
-'                  Dim tmpstr1$, tmpstr2$, tmpstr3$
-                  tmpstr1 = FasStack.pop
-                  tmpstr2 = FasStack.pop
-                  tmpstr3 = """" & _
-                     LoadResStringDll(tmpstr1, _
-                                             App.Path & "\" & Split(tmpstr2, """")(1) _
-                           ) & """"
-                  DisASM = tmpstr3 & " '" & FuncName & "' from " & tmpstr2
-                  FasStack.push tmpstr3 '& "<-" & tmpstr2
-                  
-               Case Else
-                  DisASM = FuncName & " " & param(1) & " Params are above <- Convert to funcptr"
-                  'FasStack.ESP = FasStack.ESP - param(1)
-                  'FasStack.push "Retval of " & MVars(param(2))
-                  tmpstr2 = Join(FasStack.popArray(param(1)))
-                  
-                  
-                ' Patch Decompiled lines (LispFileData)
-                  tmpstr1 = FrmMain.LispFileData.pop
-                  
-                  If InStr(tmpstr1, ")") Then
-                    'Defun xyz (x1, x2 / a1, a2)
-                     tmpstr1 = Replace(tmpstr1, ")", Replace(tmpstr2, "'(", " / "))
-                  Else
-                    'Defun xyz (/ a1, a2)
-                     tmpstr1 = tmpstr1 + Replace(tmpstr2, "'(", "(/ ")
-                  End If
-                  
-                  If FuncName = "_al-bind-alist" Then
-                     'FasStack.push "" 'tmpstr1
-                     FasStack.push tmpstr1
-                     'FrmMain.LispFileData.push tmpstr1
-                     
-                  Else
-                     FasStack.push "(" & FuncName & " " & _
-                          tmpstr2 & ")"
-
-                  End If
-
-
-              End Select
+''Convert to funcptr
+'         Case &H51
+'              DisASM_short = "FUNC"
+'              param.add make_INT(.int8, 1) 'gets overwrite with 45 or 5A
+'              param.add make_INT(.int16, 2)  'GVarIdx    ->long(lo)
+'              param.add make_INT(.int16, 2)  'test if 00 ->long(hi)
+'              '"<- Convert to funcptr and ebx--"
+'
+'              Dim FuncName
+'              FuncName = MVars(param(2))
+'              Select Case FuncName
+'
+'               Case "string-resource"
+''                  Dim tmpstr1$, tmpstr2$, tmpstr3$
+'                  tmpstr1 = FasStack.pop
+'                  tmpstr2 = FasStack.pop
+'                  tmpstr3 = """" & _
+'                     LoadResStringDll(tmpstr1, _
+'                                             App.Path & "\" & Split(tmpstr2, """")(1) _
+'                           ) & """"
+'                  DisASM = tmpstr3 & " '" & FuncName & "' from " & tmpstr2
+'                  FasStack.push tmpstr3 '& "<-" & tmpstr2
+'
+'               Case Else
+'                  DisASM = FuncName & " " & param(1) & " Params are above <- Convert to funcptr"
+'                  'FasStack.ESP = FasStack.ESP - param(1)
+'                  'FasStack.push "Retval of " & MVars(param(2))
+'                  tmpstr2 = Join(FasStack.popArray(param(1)))
+'
+'
+'                ' Patch Decompiled lines (LispFileData)
+'                  tmpstr1 = FrmMain.LispFileData.pop
+'
+'                  If InStr(tmpstr1, ")") Then
+'                    'Defun xyz (x1, x2 / a1, a2)
+'                     tmpstr1 = Replace(tmpstr1, ")", Replace(tmpstr2, "'(", " / "))
+'                  Else
+'                    'Defun xyz (/ a1, a2)
+'                     tmpstr1 = tmpstr1 + Replace(tmpstr2, "'(", "(/ ")
+'                  End If
+'
+'                  If FuncName = "_al-bind-alist" Then
+'                     'FasStack.push "" 'tmpstr1
+'                     FasStack.push tmpstr1
+'                     'FrmMain.LispFileData.push tmpstr1
+'
+'                  Else
+'                     FasStack.push "(" & FuncName & " " & _
+'                          tmpstr2 & ")"
+'
+'                  End If
+'
+'
+'              End Select
 
             
          Case &H45 'Function in Ram (Converted)
-            param.add .int8
-            param.add .int32
-            DisASM = "Memdumpfunc !!! Call " & param(2) & " (" & Join(FasStack.popArray(param(1))) & ")"
+            Param.add make_INT(.int8, 1)
+            Param.add make_INT(.int32, 4)
+            DisASM = "Memdumpfunc !!! Call " & Param(2) & " (" & Join(FasStack.popArray(Param(1))) & ")"
             FasStack.push DisASM
          
          Case &H5A  'Function in Ram (Converted)
-            param.add .int8 'Number of Stack elements; 0..3 valid else "error in XNCALL"
-            param.add .int32 '->fctptr "..\KERN\FNS\XRUN.CPP"
+            Param.add make_INT(.int8, 1) 'Number of Stack elements; 0..3 valid else "error in XNCALL"
+            Param.add make_INT(.int32, 4) '->fctptr "..\KERN\FNS\XRUN.CPP"
 
-            DisASM = "Memdumpfunc !!! Call VL.ARX!" & param(2) & " (" & Join(FasStack.popArray(param(1))) & ")"
+            DisASM = "Memdumpfunc !!! Call VL.ARX!" & Param(2) & " (" & Join(FasStack.popArray(Param(1))) & ")"
             FasStack.push DisASM
          
          
          
          Case &H5F
-            param.add .int8 '0
-            param.add .int32 '1
+            DisASM_short = "CaByOffs"
             
+          ' Param #1 - ParamAbove
+            Set ParamAbove = make_INT(.int8, 1) 'Params are above (stored in [ebp+c])
+            Param.add ParamAbove
+            
+          ' Param #2 - Function Offset
+            Dim FuncOffset
+            FuncOffset = make_INT(.int32, 4)
+            Param.add FuncOffset
+            
+          ' Fetch Params
+            Dim Params
+            Params = FasStack.popArray(Param(1))
+            
+          ' Fetch Function
             DisASM = ""
             On Error Resume Next
-            DisASM = FasFunctionnames(CStr(param(2)))
+            DisASM = FasFunctionnames(CStr(FuncOffset))
             On Error GoTo InterpretStream_rek_err
  
-            DisASM = "jmp1 " & DisASM & " at " & param(2) & "(" & Join(FasStack.popArray(param(1)), " ") & ")"
-            FasStack.push "Retval of " & DisASM
+          ' Output
+            FasStack.push make_USUBR(TokenFull(DisASM, Params))
+            DisASM = "CallByOffset @" & OffToStr(FuncOffset) & " : " & DisASM & " (" & Join(Params) & ")"
             
-         
          
          Case &H53
          '<vl.public: virtual short closure::ltid(void)>, vl.closure::ltid
@@ -1724,56 +2128,65 @@ On Error GoTo InterpretStream_rek_err
               FasStack.push "Retval of " & DisASM
          
          Case &H2E
-            param.add .int8 'flag ?
-            DisASM = "StackCallAndJmp " & FasStack.pop & " (" & Join(FasStack.popArray(param(1)), ",") & ")"
+            Param.add make_INT(.int8, 1) 'flag ?
+            DisASM = "StackCallAndJmp " & FasStack.pop & " (" & Join(FasStack.popArray(Param(1)), ",") & ")"
          
          Case &H2F
-            param.add .int8
-            param.add .int16
-            DisASM = "CallAndJmp " & MVars(param(2)) & " (" & Join(FasStack.popArray(param(1)), ",") & ")"
+            Param.add make_INT(.int8, 1)
+            Param.add make_INT(.int16, 2)
+            DisASM = "CallAndJmp " & MVars(Param(2)) & " (" & Join(FasStack.popArray(Param(1)), ",") & ")"
             
          Case &H60
             
-            param.add .int8 '0
-            param.add .int32 '1
+            Param.add make_INT(.int8, 1) '0
+            Param.add make_INT(.int32, 4) '1
             
             DisASM = ""
             On Error Resume Next
-            DisASM = FasFunctionnames(CStr(param(2)))
+            DisASM = FasFunctionnames(CStr(Param(2)))
             On Error GoTo InterpretStream_rek_err
  
-            DisASM = "jmp2_nopop " & DisASM & " at " & param(2) & "(" & Join(FasStack.popArray(param(1)), " ") & ")"
+            DisASM = "jmp2_nopop " & DisASM & " at " & Param(2) & "(" & Join(FasStack.popArray(Param(1)), " ") & ")"
             FasStack.push "Retval of " & DisASM
 
          Case &H61
-            param.add .int8
-            param.add .int32
-            DisASM = "[" & param(2) & "]"
+            Param.add make_INT(.int8, 1)
+            Param.add make_INT(.int32, 4)
+            DisASM = "[" & Param(2) & "]"
             On Error Resume Next
-            Stop
-            DisASM = FasFunctionnames(CStr(param(2))) ' param2 is 32 - is that correct -normally it is a int16
+            DisASM = FasFunctionnames(CStr(Param(2))) ' param2 is 32 - is that correct -normally it is a int16
+            
+            Stop 'for Exploring
             
             On Error GoTo InterpretStream_rek_err
  
-            DisASM = "continue at " & DisASM & " " & Join(FasStack.popArray(param(1)), " ") & ")"
+            DisASM = "continue at " & DisASM & " " & Join(FasStack.popArray(Param(1)), " ") & ")"
             FasStack.push "(" & DisASM & ")"
             
          Case &H18: 'Copy Stack to local Var
             DisASM_short = "iArgs"
             Description = "Init args and local vars with stack"
             
-            param.add .int16
+          ' Param #1 - ParamsCount
+            Dim ParamsCount
+            ParamsCount = .int16
+            Param.add make_INT(ParamsCount, 2)
             
             Dim isStartof_ForEach As Boolean
             isStartof_ForEach = Last_FasCmdline.Commando = &H1 'NIL
             
-            
-            tmp = (param(1) \ 2) * 2 'Align to 2 - to ensure that there are always pairs
-            tmp = FasStack.popArray(tmp)
+            Dim LVars_
+            tmp = (ParamsCount \ 2) * 2 'Align to 2 - to ensure that there are always pairs
+            LVars_ = FasStack.popArray(tmp)
             DisASM = "Init ("
             
             If isStartof_ForEach Then
                DisASM = DisASM & "...Start of For Each..."
+               Debug.Assert UBound(LVars_) = 2 'sometimes 4
+               
+               Set Brancher.ForEach_item = LVars_(1)
+               asValue Brancher.ForEach_item
+               
             Else
 
                
@@ -1784,23 +2197,28 @@ On Error GoTo InterpretStream_rek_err
                
                If IsArray(tmp) Then
                
-                  For i = LBound(tmp) To UBound(tmp) Step 1
+                  For i = LBound(LVars_) To UBound(LVars_) Step 1
                   
                      If i Mod 2 Then
                        'VarName
-                        asValue tmp(i)
-                        FasFuncCurrent.Args.add tmp(i), CStr(i)
+                       Dim VarName
+                       VarName = LVars_(i): asValue LVars_(i)
+                       
+                     ' Add Arg
+                       FasFuncCurrent.Args.add VarName, CStr(i)
+                       Debug.Assert FasFuncCurrent.Args(CStr(i)) = VarName
    
-                        DisASM = DisASM & tmp(i)
-                        FasCmdline.Interpreted = FasCmdline.Interpreted & "  " & tmp(i)
+                        DisASM = DisASM & VarName
+                        FasCmdline.Interpreted = FasCmdline.Interpreted & "  " & VarName
                      Else
                        'Pos LocalVar
-                        DisASM = DisASM & "=[L" & tmp(i) & "]  "
+                        DisASM = DisASM & "=[L" & LVars_(i) & "]  "
                      End If
                   Next
                   
                End If
                
+               Dim tmpstr1$, tmpstr2$ ', tmpstr3$
                tmpstr1 = FrmMain.LispFileData.pop
                tmpstr2 = "(" & LTrim$(FasCmdline.Interpreted) & ")"
                
@@ -1815,24 +2233,24 @@ On Error GoTo InterpretStream_rek_err
                
             End If
             
-            DisASM = DisASM & ") " & ((param(1)) And 1)
-'Debug.Assert (param(1) And 1) = 0
+            DisASM = DisASM & ") " & (ParamsCount And 1)
+           'Debug.Assert (param(1) And 1) = 0
             
          Case &H19:
-            param.add .int16
+            Param.add make_INT(.int16, 2)
 '            Debug.Assert (param(1) And 1) = 1  'stop when this is 0 - for further exmiation?
             'tmp = param(1) \ 2 + 1
-            DisASM = "clear " & param(1) & " args+vars" '& _
+            DisASM = "clear " & Param(1) & " args+vars" '& _
                IIf((param(1) And 1), "", " last func in stream !")
 '            FAsStack.ESP = FAsStack.ESP - tmp
                            
 '         Case &H1D
 '            Stop
          Case &H1E
-            param.add .int8
+            Param.add make_INT(.int8, 1)
             DisASM = "??? alpha " & FasStack.pop
          Case &H1F
-            param.add .int8
+            Param.add make_INT(.int8, 1)
             DisASM = "??? beta"
 'Symbol-Handling Functions
          Case &H23 ' Null and Not is same - Typically
@@ -1845,8 +2263,8 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "Is " & FasStack.Current & " no list?"
             FasStack.push "(atom " & FasStack.pop & ")"
          Case &H25
-            param.add .int8
-            tmp = "LVar[" & param(1) & "]"
+            Param.add make_INT(.int8, 1)
+            tmp = "LVar[" & Param(1) & "]"
             DisASM = "IsSym (FSL) " & tmp & " & " & FasStack.Current 'ltid
 '            FasStack.push tmp
             
@@ -1868,10 +2286,10 @@ On Error GoTo InterpretStream_rek_err
 
        '(car (cons x y)) => x
          Case &H28 'Get first element
-            DisASM = "push data element(1.st) of (cons " & FasStack.Current & ") ;CAR"
+            DisASM = "push data element(1.st) of ( " & FasStack.Current & ") ;CAR"
             DisASM_short = "CAR"
             
-            FasStack.push make_ITEM(TokenFull("car", FasStack.pop))
+            FasStack.push make_ITEM(TokenFull("car", FasStack.pop), True)
             'tmp = "list element from (" & FasStack.pop & ")" 'losid::mark(void)'[ebx+08h]
             'disasm = "push " & tmp
             'FasStack.push tmp
@@ -1881,7 +2299,7 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "push list element(2.nd) of (cons " & FasStack.Current & ") ;CDR"
             DisASM_short = "CDR"
 
-            FasStack.push make_ITEM(TokenFull("cdr", FasStack.pop))
+            FasStack.push make_ITEM(TokenFull("cdr", FasStack.pop), True)
             
 '            tmp = "next list element from (" & FasStack.pop & ")" 'losid::mark(void) '[ebx+0Ch]
 '            disasm = "push " & tmp
@@ -1920,14 +2338,14 @@ On Error GoTo InterpretStream_rek_err
             '[esp-2]=funct(esp-2,esp-1)
             
          Case &H2C
-            param.add .int8 'index
-            tmp = FasStack.pop & " [" & param(1) & "]" '& MVars(param(1))  '"losid_subtype_p"
+            Param.add make_INT(.int8, 1) 'index
+            tmp = FasStack.pop & " [" & Param(1) & "]" '& MVars(param(1))  '"losid_subtype_p"
             FasStack.push (tmp)
             DisASM = tmp
             
          Case &H2D
-            param.add .int8 'index
-            tmp = FasStack.pop & " = " & FasStack.pop & " [" & param(1) & "]" '& MVars(param(1)) 'losid_subtype_p
+            Param.add make_INT(.int8, 1) 'index
+            tmp = FasStack.pop & " = " & FasStack.pop & " [" & Param(1) & "]" '& MVars(param(1)) 'losid_subtype_p
             FasStack.push tmp
             DisASM = tmp
             
@@ -1937,24 +2355,24 @@ On Error GoTo InterpretStream_rek_err
             DisASM_short = "Ld_INT8"
             Description = "push signed 8 Bit Integer from stream => stack"
             
-            param.add make_INT(.int8Sig)
+            Param.add make_INT(.int8Sig, 1)
             
-            DisASM = "push  " & Format(param(1), "00")
-            FasStack.push param(1)
+            DisASM = "push  " & Format(Param(1), "00")
+            FasStack.push Param(1)
 
         'Load_INT32
          Case &H33:
             DisASM_short = "Ld_INT32"
             Description = "push signed 32 Bit Integer from stream => stack"
 
-            param.add .int32 'var1=v+v
+            Param.add make_INT(.int32, 4) 'var1=v+v
             
           '' Speciality why this value was not encoded using the INT8 opcode?
           '  Debug.Assert param(1) > &HFF&
 
             'push .int32
-            DisASM = "push " & Format(param(1), "00000000")
-            FasStack.push param(1)
+            DisASM = "push " & Format(Param(1), "00000000")
+            FasStack.push Param(1)
          
          
         'Load_STRs
@@ -1963,15 +2381,15 @@ On Error GoTo InterpretStream_rek_err
             Description = "push Strings[lnode] from stream => stack"
 
          
-'           param.Add .int16sig 'Number of strings that follow
+'           param.add make_INT(.int16, 2)sig 'Number of strings that follow
            
            'Read all Strings
             For i = 1 To .int16 'param(1)
-'               param.Add .int16 'Stringlength
+'               param.add make_INT(.int16, 2) 'Stringlength
                                                                             '=Last Parameter
-               Set tmp = make_STR(Replace(.FixedString(.int16), vbLf, "\n"))
+               Set tmp = make_STR(.FixedString(.int16))
 '               tmp = .fixedString(param(param.Count))
-               param.add tmp
+               Param.add tmp
              
              ' Add String to Stack ( will be loaded into StringTable later)
                FasStack.push tmp
@@ -1998,7 +2416,7 @@ On Error GoTo InterpretStream_rek_err
                If Len(tmp) = 0 Then Exit Do
              
              ' store symbolString
-               param.add tmp
+               Param.add tmp
                
                
 '             ' FAS command are stored in upcase
@@ -2013,19 +2431,19 @@ On Error GoTo InterpretStream_rek_err
          
          
          Case &H40
-            param.add .int16 '+0
-            param.add .int32 '+2
+            Param.add make_INT(.int16, 2) '+0
+            Param.add make_INT(.int32, 4) '+2
             DisASM = "??? memMov sth."
             
             FasStack.push DisASM
          
          Case &H37
-            param.add .int16 'int16sig
-            tmp = "ListObject B with " & param(1) & " elements"
+            Param.add make_INT(.int16, 2) 'int16sig
+            tmp = "ListObject B with " & Param(1) & " elements"
             DisASM = "push " & tmp '[cons]
             'pop * number of param(1); push FuncListObject
 '            FAsStack.ESP = FAsStack.ESP - param(1)
-            FasStack.push "<list( " & Join(FasStack.popArray(param(1)), ",") & ")>"
+            FasStack.push "<list( " & Join(FasStack.popArray(Param(1)), ",") & ")>"
             
             
          Case &H38:
@@ -2034,18 +2452,18 @@ On Error GoTo InterpretStream_rek_err
          'Ld_REAL
          Case &H3B
               
-              param.add make_REAL(.zeroString)
-              FasStack.push param(1)
+              Param.add make_REAL(.zeroString)
+              FasStack.push Param(1)
               DisASM_short = "Ld_REAL"
               DisASM = "push 'Floating-point' number string for stream => stack"
          
        ' Ld_LIST
          Case &H39   'Choose Array for store strings
-            param.add .int16
-            FasStack.push make_LIST(FasStack.popArray(param(1)))
+            Param.add make_INT(.int16, 2)
+            FasStack.push make_LIST(FasStack.popArray(Param(1)))
             
             DisASM_short = "Ld_LIST"
-            DisASM = "Combines " & param(1) & " elements on the stack to a LIST"
+            DisASM = "Combines " & Param(1) & " elements on the stack to a LIST"
             
        
         'Define Functions
@@ -2131,6 +2549,7 @@ On Error GoTo InterpretStream_rek_err
           ' not comfirmed by code analysis
             tmp = FasStack.popArray(9)
             DisASM = "SetupErrorHandler "
+            DisASM_short = "hERROR"
             
             Dim Logger2 As New clsStrCat
             Logger2.Clear 'since we my come here several times
@@ -2150,7 +2569,7 @@ On Error GoTo InterpretStream_rek_err
             
             DisASM = DisASM & Join(tmp)
             
-            FasStack.push FasCmdline.Interpreted  '";; " & disasm
+            FasStack.push make_ITEM(FasCmdline.Interpreted)   '";; " & disasm
             
             
          'Stream init(
@@ -2161,67 +2580,107 @@ On Error GoTo InterpretStream_rek_err
             ')
          'It is very well for getting Strings and Functions
          'It is called 3 Times
-         '  #1 => Strings of this stream
-         '  #2 => Strings of the functionStream
-         '  #3.=> Append function definition of this stream
-         'After that initialiation is finished
-         'now Decompilation could start
+         '  #1 => this stream: Strings
+         '  #2 => functionStream: Strings
+         '  #3 => this stream: Append function definition
+         ' After initialiation is finished decompilation can start
+         
+            Static case_43_counter  'helped to decide which stringtable to use
+            Inc case_43_counter
+            Debug.Assert case_43_counter <= 3 'so far this is called only 3 times during initialisation
+         
          
             DisASM_short = "iVars"
             DisASM = "pops elements from stack => Var Storage; 2x param's, 1x stack"
 
+            Dim St_init, VarPos
+            
+          ' Param #1 - VarPos
+            VarPos = .int16
+            Param.add make_INT(VarPos, 2)
+            
+          ' Param #2 - St_init
+            St_init = .int16
+            Param.add make_INT(St_init, 2)
 
-            param.add .int16
-            param.add .int16
             
+          ' Stack -local_ModuleID
             Dim local_ModuleID
-            Set local_ModuleID = FasStack.pop
+            Set local_ModuleID = FasStack.Current: FasStack.popIntoVoid
             
-            DisASM = "St_init " & param(2) & " Stackitem => " & _
-                     " VarPos " & param(1) & " @" & _
-                       IIf(TypeOf local_ModuleID Is T_NIL, "nil", local_ModuleID)
+          ' Known values so far
+'            Debug.Assert local_ModuleID = 0 Or _
+'                         TypeOf local_ModuleID Is T_NIL
+
+            DisASM = "St_init " & St_init & " Stackitem => " & _
+                     " VarPos " & VarPos & " @" & _
+                       IIf(TypeOf local_ModuleID Is T_NIL, _
+                           "nil", _
+                           local_ModuleID _
+                        )
                        'IIf(tmp = "nil", "this stream", "FuncStream")
-                                          
-                                          
-                                          
-            'case_43_counter = case_43_counter + 1
+                       
             
           ' Fill ModulVars
-            local_ModuleID = IIf(TypeOf local_ModuleID Is T_NIL, 0, 1)             'Choose(case_43_counter, 0, 1, 0)
-            'var1=FAsStack.popArray(
-            Dim Logger As New clsStrCat
-            Logger.Clear 'since we my come here several times
+            local_ModuleID = IIf(TypeOf local_ModuleID Is T_NIL, 0, 1) 'Choose(case_43_counter, 0, 1, 0)
             
-            Logger.Concat vbCrLf
-            For i = param(2) - 1 + param(1) To param(1) Step -1
+            Dim DoLogging As Boolean
+            DoLogging = opt_Log_DumpModulVars
+            
+          ' Copy from Stack into ModulVar Storage
+            Dim Logger As clsStrCat: Set Logger = New clsStrCat
+            If DoLogging Then Logger.Concat vbCrLf
+            
+            
+          ' Go from VarPos ... St_init in reverse (since pop it from the stack gives reverse order)
+            For i = VarPos + (St_init - 1) To VarPos Step -1
+          '
+          ' Idea:
+          '   implementing a fixed size(size set on init) stack that grows(on push) downwards to 0
+          '   (... and offer access via index) we could directly use it
+            
+            
+             ' get item
                On Error Resume Next
+               
                Set tmp = FasStack.Current
-               If Err Then Err.Clear: Let tmp = FasStack.Current
+               If Err Then Err.Clear: Stop: Let tmp = FasStack.Current
                FasStack.popIntoVoid
                
+             ' PATCH - Defun Main - don't show Retval (NIL)
+             '
+               If (local_ModuleID = 0) And (i = St_init - 1) Then
+                  Debug.Assert TypeOf tmp Is T_NIL
+                  tmp.SupressOutput = True
+               End If
+               
+             ' copy into Modul vars
                MVarsEx(i, local_ModuleID) = tmp
 
-'                  Let MVarsEx(i, local_ModuleID) = tmp
-'                  Err.Clear
-'               End If
                
-               
-               'Indent with 4 Tab's
-               Logger.Concat String(4, vbTab) & ";; "
-               Logger.Concat "#" & BlockAlign_r(i, 8) & " = " & tmp.toText
-               If Err Then
-                  Err.Clear
-                  Logger.Concat "#" & BlockAlign_r(i, 8) & " = " & tmp
+             ' Dump Vars into Log
+               If DoLogging Then
+                 
+               ' Indent with 4 Tab's
+                 Logger.Concat String(4, vbTab) & ";; "
+                 Logger.Concat "#" & BlockAlign_r(i, 8) & " = " & tmp.toText
+                 If Err Then
+                    Err.Clear
+                    Logger.Concat "#" & BlockAlign_r(i, 8) & " = " & tmp
+                 End If
+      '           Logger.Concat IIf(i Mod 2, vbCrLf, vbTab & vbTab)
+                 Logger.Concat vbCrLf
+                 
                End If
-    '           Logger.Concat IIf(i Mod 2, vbCrLf, vbTab & vbTab)
-               Logger.Concat vbCrLf
 
             Next
-            FasStack.push ";; " & DisASM
             
-            FasCmdline.Interpreted = Logger.value
-'            FasStack.push ";; inited MVars_#" & local_ModuleID
-'           fas43count = fas43count + 1 '<- dirty dirty smuddcode !!!
+            If DoLogging Then FasCmdline.Interpreted = Logger.value
+            
+
+          ' needs to be after the init loop that pops elements from the stack
+            FasStack.push make_ITEM(";; " & DisASM)
+
            'Create new stringtable only if nessary
 '            If (fas43count = 1) Or (fas43count = 3) Then
 '               m_MVars.Add m_MVar
@@ -2238,8 +2697,26 @@ On Error GoTo InterpretStream_rek_err
                "<=", ">=", _
                "<", ">" _
                )
-            DisASM = TokenFull(DisASM_short, Join(FasStack.popArray(2)))
+               
+            'Dim Params
+            Params = FasStack.popArray(2)
+            
+          ' Repeat patch
+            Dim bDiscardCommand As Boolean
+            bDiscardCommand = Brancher.Repeat_PatchFor_h4B(FasCmdline.Commando, Params(2))
+            
+            If bDiscardCommand Then
+               DisASM = Params(1)
+            Else
+               DisASM = TokenFull(DisASM_short, Join(Params))
+            End If
+            
+            
             FasStack.push DisASM
+            
+            If bDiscardCommand Then DisASM = DisASM & " '<= xxx 0' was DISCARDED since a 'Repeat' follows"
+
+            
          
 'unary
          Case &H4F, &H50
@@ -2302,12 +2779,8 @@ On Error GoTo InterpretStream_rek_err
          End Select
          
          
-'         FasCmdline.Interpreted = Interp
-         FasCmdline.Disassembled_Short = DisASM_short
-         FasCmdline.Disassembled = GetIndent(level) & DisASM
-         FasCmdline.Interpreted = GetIndent(level) & FasCmdline.Interpreted
+         InterpretStream_output DisASM, DisASM_short, Description
          
-         RaiseEvent InterpretingProgress(FasCmdline)
          If FrmMain.Chk_Cancel Then
             Err.Raise ERR_GUI_CANCEL, "", tmp
          End If
@@ -2343,7 +2816,7 @@ On Error GoTo InterpretStream_rek_err
          End If
         
          
-noOutput:
+NoOutput:
          
        ' Save Stack state / at the moment just for debugging purpose
        ' comment out to free some memory
@@ -2367,8 +2840,7 @@ noOutput:
    
 '   If FasStack.ESP > StartEsp Then
 '      FasCmdline.Interpreted = FasStack.pop
-'      FasCmdline.Disassembled = GetIndent(level) & "Retval"
-'      RaiseEvent InterpretingProgress(FasCmdline)
+'      InterpretStream_output DisASM, DisASM_short, Description
 '   End If
 
 '   when uncomment change 'IF ' which needs stack
@@ -2431,7 +2903,7 @@ Select Case Err
          defaultButton = vbDefaultButton2
       #End If
       
-'            Dim retval&
+            'Dim retval&
 asd
             retval = MsgBox(Errmsg & vbCrLf & _
                                "Start Debugging? (Cancel to stop at all / No to Continue)", _
@@ -2543,7 +3015,7 @@ Private Sub getStreamData(Datalength, INPUT_NumberOfVars, INPUT_NewStream) 'As F
       
       ' Create FasKey & Fill it with data
         Set FasKey = New FileStream
-        FasKey.Create .Filename & ".key", True, CreateFilesTemporary
+        FasKey.create .Filename & ".key", True, CreateFilesTemporary
         FasKey.FixedString(-1) = .FixedString(keylength)
         If Err = ERR_OPENFILE Then
             
@@ -2565,11 +3037,13 @@ Private Sub getStreamData(Datalength, INPUT_NumberOfVars, INPUT_NewStream) 'As F
        'FAS:
        '(strcat (random-string (+ 6 (random& 5) ) ) "\n;fas4 crunch\n;")
        
-       If isFas Then
+       If isFas And (FasFile_Version = 4) Then
+
        
        '(strcat ... "\n;fas4 crunch\n;")
          Const KeyConstMarker = vbLf & ";"
          Const KeyConstSign = KeyConstMarker & "fas4 crunch" & KeyConstMarker
+         Const KeyConstSign2 = vbNullChar & vbNullChar & ";Crunched FAS2-FILE" & vbCrLf & ";"
          
          Dim KeyPart_Const
          FasKey.Position = 0
@@ -2624,7 +3098,7 @@ Private Sub getStreamData(Datalength, INPUT_NumberOfVars, INPUT_NewStream) 'As F
               ' Create Filestream to write uncrypted data in FasResourceData
                 Dim FasResourceDataWrite As FileStream
                 Set FasResourceDataWrite = New FileStream
-                FasResourceDataWrite.Create (.Filename)
+                FasResourceDataWrite.create (.Filename)
                 FasResourceDataWrite.MemOnlyMode = True
 
               
@@ -2745,7 +3219,7 @@ Private Sub FSLStreamLoad( _
        
        
          '2. Create FasFunctionDataStream...
-           OutStream.Create .Filename & Ext, True, CreateFilesTemporary
+           OutStream.create .Filename & Ext, True, CreateFilesTemporary
          '...& Fill it with data
            getStreamData StreamLength, StreamVars, OutStream
 
@@ -2779,7 +3253,7 @@ Private Sub FASStreamLoad( _
            Loop
          
          '2. Create FasFunctionDataStream...
-           OutStream.Create .Filename & Ext, True, CreateFilesTemporary
+           OutStream.create .Filename & Ext, True, CreateFilesTemporary
          '...& Fill it with data
            getStreamData StreamLength, StreamVars, OutStream
 
@@ -2793,7 +3267,7 @@ End Sub
 
 
 
-Public Function Create(Filename As String) As Boolean
+Public Function create(Filename As String) As Boolean
     
    CreateFilesTemporary = FrmMain.Chk_cleanup.value = vbChecked
     
@@ -2801,7 +3275,7 @@ With File
   ' Store Filename
     mvarFileName = Filename
     
-    .Create Filename
+    .create Filename
     RaiseEvent initBegin
   
      
@@ -2877,6 +3351,8 @@ With File
             tmp = "vill-build-localtime: " & Build_Date
             FrmMain.AddtoLog tmp:            FileLog_Add tmp
             
+          ' also set Version for fsl - brancher uses this to decide 32 or 16 bit jumps
+            'FasFile_Version = 4
   
        Else
           Err.Raise vbObjectError + 1, "Create", "Invalid FSL_FILE_SIGNATURE. No valid Fsl File"
@@ -2899,34 +3375,36 @@ With File
      
      ' rewind by one byte (because of 'tmpchar = File.char')
        File.Move -1
-       
-       Select Case FileSig
-       Case FAS4_FILE_SIGNATURE, _
-            FAS3_FILE_SIGNATURE, _
-            FAS2_FILE_SIGNATURE, _
-            FAS__FILE_SIGNATURE
-         
-         FASStreamLoad _
-                     FasFunctionData, _
-                     ".fct", _
-                     FunctionStreamLength, _
-                     FunctionStreamVars, _
-                     Offset_CodeStart
-'----------------------
-         
-         FASStreamLoad _
-                     FasResourceData, _
-                     ".res", _
-                     ResourceStreamLength, _
-                     ResourceStreamVars, _
-                     Offset_DataStart
-
+   Select Case FileSig
+       Case FAS4_FILE_SIGNATURE:            FasFile_Version = 4
+       Case FAS3_FILE_SIGNATURE:            FasFile_Version = 3
+       Case FAS2_FILE_SIGNATURE:            FasFile_Version = 2
+       Case FAS__FILE_SIGNATURE:            FasFile_Version = 1
        Case Else
          Err.Raise vbObjectError + 1, "Create", "Invalid Fas File. FAS__FILE_SIGNATURE not found."
        End Select
+       
+               
+      FASStreamLoad _
+                  FasFunctionData, _
+                  ".fct", _
+                  FunctionStreamLength, _
+                  FunctionStreamVars, _
+                  Offset_CodeStart
+'----------------------
+      
+      FASStreamLoad _
+                  FasResourceData, _
+                  ".res", _
+                  ResourceStreamLength, _
+                  ResourceStreamVars, _
+                  Offset_DataStart
+
+       
     End If
    
-   
+
+            
    Dim overlaydata
    
    overlaydata = .FixedString(-1)
@@ -2998,6 +3476,7 @@ End Function
 Private Sub Class_Initialize()
   'load Whitespacetable
    WHITESPACETABLE = LoadResData(101, "VL_WHITESPACE_TABLE")
+   
 End Sub
 
 Private Function LoadResStringDll(ResID, DllName$) As String
@@ -3018,47 +3497,47 @@ Private Function LoadResStringDll(ResID, DllName$) As String
       LoadResStringDll = Left(Buffer, size)
    End If
 End Function
+'
+'Public Sub Label_Push(Label$, Command$)
+'   Dim adder As clsStrCat
+'
+'   On Error Resume Next
+'   Set adder = Label_Push_col.item(Label)
+'   If Err Then
+'
+'      LevelStack.push level
+'
+'      Set adder = New clsStrCat
+'      adder.Concat Command
+'      adder.Concat " " & FasStack.pop
+'      Label_Push_col.add adder, Label
+'   Else
+'      adder.Concat " " & FasStack.pop
+'   End If
+'
+'   level = level + 1
+'
+'    '& "(" & FasStack.Current & ")
+'End Sub
 
-Public Sub Label_Push(Label$, Command$)
-   Dim adder As clsStrCat
-   
-   On Error Resume Next
-   Set adder = Label_Push_col.item(Label)
-   If Err Then
-      
-      LevelStack.push level
-      
-      Set adder = New clsStrCat
-      adder.Concat Command
-      adder.Concat " " & FasStack.pop
-      Label_Push_col.add adder, Label
-   Else
-      adder.Concat " " & FasStack.pop
-   End If
-   
-   level = level + 1
-   
-    '& "(" & FasStack.Current & ")
-End Sub
-
-' Push the Label on FasStack is some is found
-' and Pop Level from LevelStack
-Public Sub Label_Pop(Label$)
-   Dim adder As clsStrCat
-   
-   On Error Resume Next
-   Set adder = Label_Push_col.item(Label)
-   If Err = 0 Then
-   
-      Dim tmp
-      tmp = "(" & adder.value & ")"
-      FasStack.Current = tmp
-      
-'      FasCmdline.Interpreted = tmp
-      level = LevelStack.pop
-      
-   End If
-End Sub
+'' Push the Label on FasStack if some is found
+'' and Pop Level from LevelStack
+'Public Sub Label_Pop(Label$)
+'   Dim adder As clsStrCat
+'
+'   On Error Resume Next
+'   Set adder = Label_Push_col.item(Label)
+'   If Err = 0 Then
+'
+'      Dim tmp
+'      tmp = "(" & adder.value & ")"
+'      FasStack.Current = tmp
+'
+''      FasCmdline.Interpreted = tmp
+'      level = LevelStack.pop
+'
+'   End If
+'End Sub
 
 'Converts string to lower case
 ' if it is completely in UPPER CASE
@@ -3094,6 +3573,17 @@ Private Function isClearArgsNVars_0x19(FileStream) As Boolean
          .Move -1
          
           isClearArgsNVars_0x19 = NextCmd = &H19
+         
+    End With
+End Function
+'Check is current location is Goto and returns its destination
+Private Function isGetVar_0x5c(FileStream) As Boolean
+    With FileStream
+         Dim NextCmd As Byte
+         NextCmd = .int8
+         .Move -1
+         
+          isGetVar_0x5c = NextCmd = &H5C
          
     End With
 End Function

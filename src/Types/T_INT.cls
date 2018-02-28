@@ -23,6 +23,8 @@ Const opcode& = &H3B 'Ld_INT8
 'Public isNil As Boolean
 Public isT As Boolean
 
+Public size As Byte
+
 
 Public value
 Attribute value.VB_VarUserMemId = 0

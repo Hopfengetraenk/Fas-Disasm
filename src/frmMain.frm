@@ -217,9 +217,9 @@ Begin VB.Form FrmMain
       BackColor       =   -2147483643
       Appearance      =   1
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "MS Sans Serif"
+         Name            =   "Liberation Sans"
          Size            =   7.8
-         Charset         =   222
+         Charset         =   0
          Weight          =   400
          Underline       =   0   'False
          Italic          =   0   'False
@@ -310,7 +310,7 @@ Begin VB.Form FrmMain
          EndProperty
       EndProperty
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "MS Sans Serif"
+         Name            =   "Gulim"
          Size            =   9.6
          Charset         =   222
          Weight          =   400
@@ -837,7 +837,7 @@ Sub LV_Log_ColumnHeadersSize_restore()
   'Restore Listview Columns
    Dim CH As ColumnHeader, tmp$
    For Each CH In LV_Log.ColumnHeaders
-      CH.Width = GetSetting(App.EXEName, "Listview", CH.key, CH.Width)
+      CH.Width = GetSetting(App.EXEName, "Listview", CH.Key, CH.Width)
 '      Debug.Print CH.Width
    Next
 
@@ -845,7 +845,7 @@ End Sub
 Sub LV_Log_ColumnHeadersSize_save()
    Dim CH As MSComctlLib.ColumnHeader, tmp$
    For Each CH In LV_Log.ColumnHeaders
-      SaveSetting App.EXEName, "Listview", CH.key, CH.Width
+      SaveSetting App.EXEName, "Listview", CH.Key, CH.Width
    Next
 End Sub
 

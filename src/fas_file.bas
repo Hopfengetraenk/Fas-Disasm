@@ -60,16 +60,11 @@ End Function
 Public Function TokenFull(Keyword, ParamArray Params())
 Err.Clear
 On Error Resume Next
+   TokenFull = TokenOpen(Keyword) & JoinToText(Params) & TokenClose(Keyword)
    TokenFull = TokenOpen(Keyword) & JoinToText(Params(0)) & TokenClose(Keyword)
-   If Err = 13 Then 'Type mismatch
-      Err.Clear
-      TokenFull = TokenOpen(Keyword) & JoinToText(Params) & TokenClose(Keyword)
-      If Err Then
-'         TokenFull = TokenOpen(keyword) & params(0).ToText & TokenClose(keyword)
-         If Err Then Stop
-      End If
-   End If
+   If TokenFull = "" Then Stop
    
+   Err.Clear
 End Function
 
 Public Function TokenComment(Line, Optional IndentLevel = 0)

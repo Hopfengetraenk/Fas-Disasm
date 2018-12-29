@@ -535,6 +535,7 @@ Private Sub DoIf(Last_FasCmdline As FasCommando, FasCmdline As FasCommando, if_E
             hasRetValue = True
          Case Else
             Stop ' unknow stackstate
+            hasRetValue = False
       End Select
       
     ' some how hasRetValue heuristic has failed
@@ -568,7 +569,15 @@ Private Sub DoIf(Last_FasCmdline As FasCommando, FasCmdline As FasCommando, if_E
          
       Else
          If hasRetValue Then
-            Debug.Assert FileStream.int8 = &H1 'Next command should be 'Push NIL'
+            
+            Dim bIsNextCmd_PushNil As Boolean
+            bIsNextCmd_PushNil = (FileStream.int8 = &H1)
+            Debug.Assert bIsNextCmd_PushNil 'Next command should be 'Push NIL'
+            
+            'Errorfixing
+            If bIsNextCmd_PushNil = False Then FileStream.Move -1
+            
+            
             FasStack.push make_ITEM("")
          End If
          

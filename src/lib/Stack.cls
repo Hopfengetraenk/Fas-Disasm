@@ -182,9 +182,11 @@ Property Get popArray(NumberOfElements) As Variant
          
       Dim i
       For i = UBound(tmp) To LBound(tmp) Step -1
-         On Error Resume Next
-         Let tmp(i) = Me.Current
-         Set tmp(i) = Me.Current
+         If IsObject(Me.Current) Then
+            Set tmp(i) = Me.Current
+         Else
+            Let tmp(i) = Me.Current
+         End If
          Me.popIntoVoid
       Next
    End If

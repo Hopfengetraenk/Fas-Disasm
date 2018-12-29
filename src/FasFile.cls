@@ -17,7 +17,7 @@ Option Explicit
 
 Private Const opt_patches As Boolean = 0
 
-Private Const opt_Log_DumpModulVars As Boolean = 1
+Private Const opt_Log_DumpModulVars As Boolean = 0
 
 
 Private LocalVars
@@ -781,7 +781,7 @@ On Error GoTo InterpretStream_rek_err
                Args.Concat TokenFull("")
             Else
             
-               Args.Concat TokenOpen("", level)
+               Args.Concat TokenOpen("")
                
              ' Concat args
                With FasFuncCurrent: Dim arg
@@ -1144,7 +1144,16 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "pop dummy (decrease stack)" & vbCrLf  ' "sub-4"
             FasCmdline.Interpreted = FasStack.pop
             
-            Debug.Assert FasStack.esp = 0
+            Debug.Assert FasStack.esp = 0 ' at this point the stack should be always embalanced
+                                          ' else this indicated some problem
+            
+          ' Error Cleanup
+            Do Until FasStack.esp = 0
+               FasCmdline.Interpreted = FasCmdline.Interpreted & _
+                     ";;;<Error app='FAS-DISAM' hint='GarbageFromStack'>" & FasStack.pop & "</Error>"
+            Loop
+            
+            
             
          Case &HB: 'Stack Duplicate Element
             DisASM_short = "Pu_Last"
@@ -1652,7 +1661,7 @@ On Error GoTo InterpretStream_rek_err
                Debug.Assert IsNextCommand(FileStream, &H9)  'Push Item
                Brancher.DoBlock DefunStart, level + 1, 1
                'Set FunctionToDecompile = Nothing
-               FasStack.popIntoVoid
+               'FasStack.popIntoVoid
                
                
              ' set output
@@ -2195,14 +2204,14 @@ On Error GoTo InterpretStream_rek_err
                Debug.Assert FasFuncCurrent.Args.count = 0
                
                
-               If IsArray(tmp) Then
+               If IsArray(LVars_) Then
                
                   For i = LBound(LVars_) To UBound(LVars_) Step 1
                   
                      If i Mod 2 Then
                        'VarName
                        Dim VarName
-                       VarName = LVars_(i): asValue LVars_(i)
+                       Set VarName = LVars_(i): asValue LVars_(i)
                        
                      ' Add Arg
                        FasFuncCurrent.Args.add VarName, CStr(i)
@@ -2218,11 +2227,16 @@ On Error GoTo InterpretStream_rek_err
                   
                End If
                
+               
+             ' Patch in args
                Dim tmpstr1$, tmpstr2$ ', tmpstr3$
                tmpstr1 = FrmMain.LispFileData.pop
                tmpstr2 = "(" & LTrim$(FasCmdline.Interpreted) & ")"
                
-               If InStr(tmpstr1, "defun") Or InStr(tmpstr1, "lambda") Then
+               If InStr(tmpstr1, "defun") Or _
+                  InStr(tmpstr1, "lambda") Then
+                  
+                  tmpstr1 = Replace(tmpstr1, " ( )", "")
                   FasCmdline.Interpreted = tmpstr1 + " " + tmpstr2
                Else
                   FasCmdline.Interpreted = tmpstr2
@@ -2823,8 +2837,12 @@ NoOutput:
          FasCmdline.Stack_Pointer_After = FasStack.esp
          
          On Error Resume Next
-         Let FasCmdline.Stack_After = FasStack.Current
-         Set FasCmdline.Stack_After = FasStack.Current
+         If IsObject(FasStack.Current) Then
+            Set FasCmdline.Stack_After = FasStack.Current
+         Else
+            Let FasCmdline.Stack_After = FasStack.Current
+         End If
+
          
          If Err Then
             FasCmdline.Stack_After = IIf(Err = ERR_STACK_IS_EMPTY, _

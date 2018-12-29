@@ -49,7 +49,7 @@ Function GetFormated()
 End Function
 Public Property Get value()
 Attribute value.VB_UserMemId = 0
-            
+   On Error Resume Next
    value = GetFormated()
             
    If AsSYM Then value = "'" & value

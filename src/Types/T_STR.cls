@@ -38,7 +38,7 @@ Public Property Get toText() As Variant
 '   toText = Replace(toText, "\", "\\")
 '   toText = Replace(toText, """", "\""")
 
-   toText = Quote(Escape(toText))
+   toText = Quote(Escape(m_value))
 End Property
 
 Private Function Escape(ByRef Str)
@@ -47,7 +47,7 @@ Private Function Escape(ByRef Str)
    If inSize = 0 Then Exit Function
    
  ' init outbuffer
-   Dim OutSize: OutSize = inSize
+   Dim OutSize: OutSize = 0
    Escape = Space(inSize * 2) ' Assuming all are escape chars
    
    Dim i, o: o = 1

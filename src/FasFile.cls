@@ -1098,18 +1098,19 @@ On Error GoTo InterpretStream_rek_err
             'Used for Lists and Strings
             Param.add make_INT(.int16, 2) '.int16Sig
             
+            
             On Error Resume Next
             Set tmp = MVars(Param(1))
             If Err Then
                Err.Clear
                tmp = MVars(Param(1))
-               
+
             Else
-            
+
+
                asSymbol tmp
 
             End If
-            
             'tmp.value = tmp.toText
             
             On Error GoTo InterpretStream_rek_err:
@@ -1144,7 +1145,7 @@ On Error GoTo InterpretStream_rek_err
             DisASM = "pop dummy (decrease stack)" & vbCrLf  ' "sub-4"
             FasCmdline.Interpreted = FasStack.pop
             
-            Debug.Assert FasStack.esp = 0 ' at this point the stack should be always embalanced
+'            Debug.Assert FasStack.esp = 0 ' at this point the stack should be always embalanced
                                           ' else this indicated some problem
             
           ' Error Cleanup
@@ -1798,10 +1799,8 @@ On Error GoTo InterpretStream_rek_err
                      Param.add boolToText(True)
                      Param.add boolToText(True)
                      
+                     'delme
                      Debug.Assert Flags = 0
-                     Param.add boolToText(False)
-                     Param.add boolToText(False)
-                     Param.add boolToText(False)
                      
                    ' There is no defun name...
                      Dim DefunName

@@ -33,5 +33,3 @@ End Property
 Public Property Get toText() As Variant
    toText = value
 End Property
-
-

@@ -490,14 +490,14 @@ Function strCrop$(Text$, LeftString$, RightString$, Optional errorvalue = "", Op
 
 End Function
 
-Function MidMbcs(ByVal str As String, Start, Length)
-    MidMbcs = AToU(MidB$(UToA(str, 0), Start, Length), 0)
+Function MidMbcs(ByVal Str As String, Start, Length)
+    MidMbcs = AToU(MidB$(UToA(Str, 0), Start, Length), 0)
 End Function
 
 
-Function strCutOut$(str$, pos&, Length&, Optional TextToInsert = "")
-   strCutOut = Mid(str, pos, Length)
-   str$ = Mid(str, 1, pos - 1) & TextToInsert & Mid(str, pos + Length)
+Function strCutOut$(Str$, pos&, Length&, Optional TextToInsert = "")
+   strCutOut = Mid(Str, pos, Length)
+   Str$ = Mid(Str, 1, pos - 1) & TextToInsert & Mid(Str, pos + Length)
 End Function
 
 
@@ -907,14 +907,14 @@ Sub Checkbox_TriStateToggle(CheckBox As CheckBox, value)
 End Sub
 
 
-Public Function MakePrintable$(str$)
+Public Function MakePrintable$(Str$)
    
-   MakePrintable = str
+   MakePrintable = Str
    Dim i
-   For i = 1 To Len(str)
+   For i = 1 To Len(Str)
       
       Dim char$
-      char = Mid(str, i, 1)
+      char = Mid(Str, i, 1)
       Select Case char
          Case vbNullChar To " "
             char = "."
@@ -926,8 +926,8 @@ Public Function MakePrintable$(str$)
 
 End Function
 
-Function Left2$(str$, Optional Length_SeenFromEnd& = 1)
-    Left2 = Left(str$, Len(str$) - Length_SeenFromEnd)
+Function Left2$(Str$, Optional Length_SeenFromEnd& = 1)
+    Left2 = Left(Str$, Len(Str$) - Length_SeenFromEnd)
 End Function
 
 

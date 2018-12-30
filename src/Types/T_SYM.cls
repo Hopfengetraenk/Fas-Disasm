@@ -24,6 +24,8 @@ Attribute m_value.VB_VarUserMemId = 0
 Const opcode_fas& = &H5B 'ld_SYM
 Const opcode_fsl = &H56
 
+Private knownSymbols As New Collection
+
 Public AsSYM As Boolean
 
 Public Property Get value()
@@ -31,7 +33,7 @@ Attribute value.VB_UserMemId = 0
 
    Err.Clear
 
-   If AsSYM Then
+   If AsSYM And Collection_IsAlreadyIn(knownSymbols, m_value) Then
       value = "'" & m_value
    Else
       value = m_value
@@ -57,3 +59,10 @@ Public Property Get toText() As Variant
    
    toText = m_value
 End Property
+            
+Private Sub Class_Initialize()
+   Dim item
+   For Each item In Split("EXRXSUBR LIST SUBR FILE ENAME PICKSET REAL INT STR")
+      knownSymbols.add "", item
+   Next
+End Sub

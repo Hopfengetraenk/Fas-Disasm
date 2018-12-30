@@ -535,6 +535,9 @@ Private Sub DoIf(Last_FasCmdline As FasCommando, FasCmdline As FasCommando, if_E
             hasRetValue = True
          Case Else
             Stop ' unknow stackstate
+'            FasStack.popIntoVoid
+'            FasStack.popIntoVoid
+
             hasRetValue = False
       End Select
       

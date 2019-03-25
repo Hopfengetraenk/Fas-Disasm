@@ -1,0 +1,109 @@
+;00549 67    8             If  ([EXPR]) .pop Else .pop&goto 562     IF, WHILE, REPEAT, FOREACH
+;00501 68    1             Cond If_not([EXPR]) .pop Else Goto 507   COND,OR,AND
+;00475 6A    1             and_If     ([EXPR]) .pop Else goto 481   AND
+
+
+(AND)                                                            (OR)   [ (AND nil) ]
+
+
+                                                                 00756 1         Push nil                             1
+                                                                 00757 6A    1   and_If (nil) .pop Else goto 763      0
+
+00704 2         Push T                               1           00762 2         Push T                               1
+00705 A         pop dummy                            0 T         00763 A         pop dummy                            0 (and nil)
+
+
+
+(AND EXPR1)                                                     (OR EXPR)
+
+00720 3     21  Push value of [EXPR1]                1          00784 3     1A  Push value of [EXPR]                1
+                                                                00787 68    1   Cond If (EXPR) Goto 793 Else .pop   1 (cond EXPR (
+                                                                00792 1            Push nil                         1
+00723 6A    1   and_If (EXPR1) .pop Else goto 729    0          00793 6A    1   and_If (nil) .pop Else goto 799     0
+
+00728 2         Push T                               1          00798 2         Push T                              1
+00729 A         pop dummy                  0 (and EXPR1)        00799 A         pop dummy                           0 (and nil)
+
+
+                                                   
+(AND EXPR1 EXPR2)                                               (OR EXPR1 EXPR2)                                                      
+                                                                                                                                      
+                                                                                                                                      
+00734 3     21  Push value of [EXPR1]                1          00829 3     21 Push value of [EXPR1]                 1                
+00737 6A    9   and_If (EXPR1) .pop Else goto 751    0          00832 68    9  Cond If (EXPR1) Goto 846 Else .pop    1 (cond EXPR1 (  
+                                                                                                                                      
+00742 3     1F  Push value of [EXPR2]                1          00837 3     1F    Push value of [EXPR2]              1                
+                                                                00840 68    1     Cond If (EXPR2) Goto 846 Else .pop 1 (cond EXPR2 (
+                                                                00845 1              Push nil                        1
+00745 6A    1   and_If (EXPR2) .pop Else goto 751    0          00846 6A    1  and_If (nil) .pop Else goto 852       0
+
+00750 2         Push T                               1          00851 2        Push T                                1
+00751 A         pop dummy          0 (and EXPR1 EXPR2)          00852 A        pop dummy (decrease stack)            0 (and nil)
+
+
+
+Decompiling IF Strategie
+1. THEN_PART: Rek_decomp till 1095(Else) -> return  1098(endif)
+2. ELSE_PART: Rek_decomp till 1098(endif)
+3. Build (If THEN_PART ELSE_PART)
+
+(IF TESTEXPR THENEXPR ELSEEXPR)
+
+
+01079 3     D       Push value of [TESTEXPR]       1
+01082 67    8       If (TESTEXPR)... else goto 10950
+
+01087 3     4          Push value of [THENEXPR]    1
+01090 57    3          goto 1098                   1
+01095 3     3          Push value of [ELSEEXPR]    1
+01098 A             pop dummy (decrease stack)     0 Then OR Else
+
+
+
+
+(WHILE TESTEXPR [EXPR])
+
+
+00949 1             Push nil                       1
+00950 3     D       Push value of [TESTEXPR]       2
+00953 67    9       If (TESTEXPR)... else goto 967 1
+
+00958 A                pop dummy (decrease stack)  0 nil
+
+
+00959 3     C          Push value of [[EXPR]]      1
+00962 57    FFFFFFEF   goto 950                    1
+00967 A             pop dummy (decrease stack)     0 While
+
+
+
+(REPEAT INT [EXPR])
+
+
+00972 3     A       Push value of [INT]            1
+00975 5D    0       FuncArg[0] = INT               0
+
+00978 1             Push nil                       1
+00979 5C    0       Push FuncArg[0]                2
+00982 32    0       push  00                       3
+00984 4B            <= FuncArg[0] 0                2
+
+00985 67    10      (Repeat (<= FuncArg[0] 0) ... else goto 1006 1
+
+00990 A                pop dummy (decrease stack)  0 nil
+
+
+00991 5C    0          Push FuncArg[0]             1
+00994 50               dec FuncArg[0]              1
+00995 5D    0          FuncArg[0] = (1- FuncArg[0])0
+
+00998 3     C          Push value of [[EXPR]]      1
+01001 57    FFFFFFE5   goto 979                    1
+01006 A             pop dummy (decrease stack)     0 Repeat
+
+
+
+
+
+
+' (vlisp-compile 'st "slot.lsp")
